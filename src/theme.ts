@@ -48,6 +48,10 @@ export function themeFor(a: Album): ThemeId {
   return "y2k";
 }
 
+/** Which player fits an album: tape for the cassette decades, the desktop player for the 2000s. */
+export const skinFor = (a: Album): Skin =>
+  themeFor(a) === "y2k" ? "desktop" : "tape";
+
 export interface Prefs {
   theme: ThemeId;
   accent: string | null; // null → theme default

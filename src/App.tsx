@@ -43,12 +43,14 @@ import {
   loadPrefs,
   save,
   savePrefs,
+  skinFor,
   themeFor,
   type Prefs,
   type ThemeId,
 } from "./theme";
 
 const CaseViewer = lazy(() => import("./components/CaseViewer"));
+type Skin = import("./components/Player").Skin;
 const Player = lazy(() =>
   import("./components/Player").then((m) => ({ default: m.Player })),
 );
@@ -98,11 +100,21 @@ export default function App() {
   const [details, setDetails] = useState<Record<string, Details>>({});
   const [links, setLinks] = useState(() => loadMap("bcc:yt")); // the listener's own YouTube links
   const [playToken, setPlayToken] = useState(0);
+  const [skinPick, setSkinPick] = useState<{ id: string; skin: Skin } | null>(
+    null,
+  );
   const [live, setLive] = useState<Record<string, string>>({}); // cover URLs read from the blog's own feed
 
   const open = byId.get(openId) ?? null;
   const spinning = (spinId && byId.get(spinId)) || null;
   const theme = prefs.follow && open ? themeFor(open) : prefs.theme;
+  // a skin picked by hand holds for that album, even while following
+  const skin =
+    spinning && skinPick?.id === spinning.id
+      ? skinPick.skin
+      : prefs.follow && spinning
+        ? skinFor(spinning)
+        : prefs.skin;
   const accent = prefs.accent ?? THEMES.find((t) => t.id === theme)!.accent;
 
   useEffect(() => {
@@ -528,7 +540,7 @@ export default function App() {
           {(
             [
               ["real", "Real cover scans (off = generated art)"],
-              ["follow", "Match the theme to the album I open"],
+              ["follow", "Match the theme and player to the album I open"],
               ["grain", "Paper grain & print texture"],
               ["motion", "Spinning discs & motion"],
               ["dense", "Compact crate"],
@@ -610,8 +622,11 @@ export default function App() {
               liveCover={live[spinning.id]}
               playToken={playToken}
               searchUrl={yt(spinning)}
-              skin={prefs.skin}
-              onSkin={(skin) => set({ skin })}
+              skin={skin}
+              onSkin={(skin) => {
+                set({ skin });
+                setSkinPick({ id: spinning.id, skin });
+              }}
               onStep={step}
               onClose={() => setSpinId(null)}
               onLink={(id) =>
