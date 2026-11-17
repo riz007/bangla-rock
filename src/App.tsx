@@ -8,7 +8,7 @@ const CaseViewer = lazy(() => import('./components/CaseViewer'))
 const byId = new Map(ALBUMS.map(a => [a.id, a]))
 const yt = (a: Album) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${a.artist === 'Various Artists' ? '' : a.artist} ${a.title} full album`)}`
 const spotify = (a: Album) => `https://open.spotify.com/search/${encodeURIComponent(`${a.artist === 'Various Artists' ? '' : a.artist} ${a.title}`.trim())}`
-const hashId = () => decodeURIComponent(location.hash.replace(/^#\/?(album\/)?/, ''))
+const hashId = () => location.hash.replace(/^#\/?(album\/)?/, '')
 
 function describe(a: Album) {
   const kind = a.genre === 'mix'
@@ -49,8 +49,9 @@ export default function App() {
   useEffect(() => { if (open) setSpinId(open.id) }, [open])
 
   const go = useCallback((id: string | null) => {
-    if (id) location.hash = `/album/${id}`
-    else history.pushState(null, '', location.pathname + location.search), setOpenId('')
+    // plain #id hashes so links survive sandboxed hosts and static deploys alike
+    location.hash = id ?? ''
+    setOpenId(id ?? '')
   }, [])
   useEffect(() => {
     const on = (e: KeyboardEvent) => { if (e.key === 'Escape') panel ? setPanel(null) : go(null) }
@@ -85,8 +86,8 @@ export default function App() {
         <a className="brand" href="#" onClick={e => { e.preventDefault(); search('') }}>
           <span className="brand-disc" aria-hidden="true" />
           <span>
-            <strong>Bangla CD Covers</strong>
-            <em lang="bn">বাংলা রক আর্কাইভ · ১৯৯০–২০১৩</em>
+            <strong>Bangla Rock Crate</strong>
+            <em lang="bn">বাংলা রক ক্রেট · ১৯৯০–২০১৩</em>
           </span>
         </a>
         <label className="search">
@@ -133,7 +134,7 @@ export default function App() {
 
       <main className={`crate${prefs.dense ? ' dense' : ''}`}>
         {list.map(a => (
-          <a key={a.id} className="sleeve" href={`#/album/${a.id}`} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
+          <a key={a.id} className="sleeve" href={`#${a.id}`} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
             <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} /></span>
             <span className="sleeve-meta">
               <strong>{a.title}</strong>
@@ -226,7 +227,7 @@ export default function App() {
               const a = byId.get(id)!
               return (
                 <li key={id}>
-                  <a href={`#/album/${id}`} onClick={() => setPanel(null)}><strong>{a.title}</strong><span>{a.artist} · {a.year}</span></a>
+                  <a href={`#${id}`} onClick={() => setPanel(null)}><strong>{a.title}</strong><span>{a.artist} · {a.year}</span></a>
                   <a href={yt(a)} target="_blank" rel="noreferrer" aria-label={`Listen to ${a.title} on YouTube`}>▶</a>
                   <button onClick={() => toggleTape(id)} aria-label={`Remove ${a.title}`}>×</button>
                 </li>
@@ -238,7 +239,7 @@ export default function App() {
 
       {spinning && (
         <div className="deck">
-          <a className="deck-now" href={`#/album/${spinning.id}`}>
+          <a className="deck-now" href={`#${spinning.id}`}>
             <span className="deck-disc"><Cover album={spinning} size={96} /></span>
             <span><small>Now spinning</small><strong>{spinning.title}</strong><span>{spinning.artist} · {spinning.year}</span></span>
           </a>
