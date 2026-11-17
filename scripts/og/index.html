@@ -1,65 +1,190 @@
 <!doctype html>
 <html>
-<head>
-<meta charset="utf-8" />
-<style>
-  * { box-sizing: border-box; margin: 0; }
-  body { width: 1200px; height: 630px; overflow: hidden; background: #0b0b0d; color: #e7e9ec; font-family: 'Hind Siliguri', sans-serif; }
-  .og { position: relative; width: 1200px; height: 630px; padding: 58px 64px;
-    background: radial-gradient(60% 80% at 82% 40%, #d5202b55, transparent 70%), radial-gradient(40% 50% at 0% 100%, #5b2bd033, transparent), #0b0b0d; }
-  .grain { position: absolute; inset: 0; opacity: .14; mix-blend-mode: overlay;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-  .kicker { font-size: 22px; letter-spacing: .2em; text-transform: uppercase; color: #8b929b; }
-  h1 { font: 400 112px/.92 Anton, sans-serif; text-transform: uppercase; margin-top: 18px; letter-spacing: .005em; }
-  h1 span { color: #ff3b45; display: block; }
-  .bn { font-size: 46px; font-weight: 600; margin-top: 14px; color: #f2d7da; }
-  .tag { font-size: 23px; color: #b5bbc4; margin-top: 14px; max-width: 540px; line-height: 1.35; }
-  .copy { position: relative; z-index: 2; width: 600px; }
-  .url { position: absolute; left: 64px; bottom: 44px; font: 400 24px Anton, sans-serif; letter-spacing: .12em; color: #ff3b45; }
-  .stack { position: absolute; right: 18px; top: 66px; width: 500px; height: 500px; }
-  .case { position: absolute; width: 240px; height: 240px; box-shadow: 0 30px 60px #000c, 0 0 0 3px #0a0a0c; }
-  .case canvas { width: 100%; height: 100%; display: block; }
-  .disc { position: absolute; width: 222px; height: 222px; border-radius: 50%; top: 9px; left: 70px;
-    background: radial-gradient(circle, #0b0b0d 0 12%, transparent 13%), conic-gradient(#e9ecf1, #9aa3ad, #f6d2ff, #a8f0ff, #e9ecf1, #9aa3ad, #ffe9a8, #e9ecf1); box-shadow: 0 20px 40px #000a; }
-</style>
-</head>
-<body>
-<div class="og">
-  <div class="grain"></div>
-  <div class="copy">
-  <p class="kicker">88 albums · 1990–2013 · Dhaka</p>
-  <h1>Bangla Rock<span>Crate</span></h1>
-  <p class="bn">বাংলা রক ক্রেট</p>
-  <p class="tag">Warfaze, Artcell, Aurthohin, Black, Shironamhin, Arnob &amp; the mixed-album underground — sleeve by sleeve.</p>
-  </div>
-  <p class="url">BANGLAROCK.RIZ1.DEV</p>
-  <div class="stack" id="stack"></div>
-</div>
-<script type="module">
-  import '@fontsource/anton'
-  import '@fontsource/monoton'
-  import '@fontsource/special-elite'
-  import '@fontsource/hind-siliguri/400.css'
-  import '@fontsource/hind-siliguri/600.css'
-  import { ALBUMS } from '/src/data/albums.ts'
-  import { drawCover } from '/src/cover.ts'
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #0b0b0d;
+        color: #e7e9ec;
+        font-family: "Hind Siliguri", sans-serif;
+      }
+      .og {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        padding: 58px 64px;
+        background:
+          radial-gradient(60% 80% at 82% 40%, #d5202b55, transparent 70%),
+          radial-gradient(40% 50% at 0% 100%, #5b2bd033, transparent), #0b0b0d;
+      }
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.14;
+        mix-blend-mode: overlay;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      .kicker {
+        font-size: 22px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #8b929b;
+      }
+      h1 {
+        font:
+          400 112px/0.92 Anton,
+          sans-serif;
+        text-transform: uppercase;
+        margin-top: 18px;
+        letter-spacing: 0.005em;
+      }
+      h1 span {
+        color: #ff3b45;
+        display: block;
+      }
+      .bn {
+        font-size: 46px;
+        font-weight: 600;
+        margin-top: 14px;
+        color: #f2d7da;
+      }
+      .tag {
+        font-size: 23px;
+        color: #b5bbc4;
+        margin-top: 14px;
+        max-width: 540px;
+        line-height: 1.35;
+      }
+      .copy {
+        position: relative;
+        z-index: 2;
+        width: 600px;
+      }
+      .url {
+        position: absolute;
+        left: 64px;
+        bottom: 44px;
+        font:
+          400 24px Anton,
+          sans-serif;
+        letter-spacing: 0.12em;
+        color: #ff3b45;
+      }
+      .stack {
+        position: absolute;
+        right: 18px;
+        top: 66px;
+        width: 500px;
+        height: 500px;
+      }
+      .case {
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        box-shadow:
+          0 30px 60px #000c,
+          0 0 0 3px #0a0a0c;
+      }
+      .case canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .disc {
+        position: absolute;
+        width: 222px;
+        height: 222px;
+        border-radius: 50%;
+        top: 9px;
+        left: 70px;
+        background:
+          radial-gradient(circle, #0b0b0d 0 12%, transparent 13%),
+          conic-gradient(
+            #e9ecf1,
+            #9aa3ad,
+            #f6d2ff,
+            #a8f0ff,
+            #e9ecf1,
+            #9aa3ad,
+            #ffe9a8,
+            #e9ecf1
+          );
+        box-shadow: 0 20px 40px #000a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="og">
+      <div class="grain"></div>
+      <div class="copy">
+        <p class="kicker">88 albums · 1990–2013 · Dhaka</p>
+        <h1>Bangla Rock<span>Crate</span></h1>
+        <p class="bn">বাংলা রক ক্রেট</p>
+        <p class="tag">
+          Warfaze, Artcell, Aurthohin, Black, Shironamhin, Arnob &amp; the
+          mixed-album underground — sleeve by sleeve.
+        </p>
+      </div>
+      <p class="url">BANGLAROCK.RIZ1.DEV</p>
+      <div class="stack" id="stack"></div>
+    </div>
+    <script type="module">
+      import "@fontsource/anton";
+      import "@fontsource/monoton";
+      import "@fontsource/special-elite";
+      import "@fontsource/hind-siliguri/400.css";
+      import "@fontsource/hind-siliguri/600.css";
+      import { ALBUMS } from "/src/data/albums.ts";
+      import { drawCover } from "/src/cover.ts";
 
-  const pick = ['warfaze-warfaze-1991', 'shironamhin-jahaji-2004', 'arnob-chaina-bhabish-2005', 'va-agontuk-3-2005', 'artcell-oniket-prantor-2006']
-  const pos = [[250, 20, 9], [30, 0, -10], [235, 225, 5], [20, 230, -6], [125, 115, -1]]
-  await document.fonts.ready
-  await Promise.all(['Anton', 'Monoton', 'Special Elite', 'Hind Siliguri'].map(f => document.fonts.load(`40px "${f}"`)))
-  const stack = document.getElementById('stack')
-  pick.forEach((id, i) => {
-    const a = ALBUMS.find(x => x.id === id)
-    const [x, y, r] = pos[i]
-    const wrap = document.createElement('div')
-    wrap.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:rotate(${r}deg)`
-    if (i === pick.length - 1) { const d = document.createElement('div'); d.className = 'disc'; wrap.append(d) }
-    const c = document.createElement('div'); c.className = 'case'
-    const cv = document.createElement('canvas'); cv.width = cv.height = 540
-    drawCover(cv, a); c.append(cv); wrap.append(c); stack.append(wrap)
-  })
-  document.body.dataset.ready = '1'
-</script>
-</body>
+      const pick = [
+        "warfaze-warfaze-1991",
+        "shironamhin-jahaji-2004",
+        "arnob-chaina-bhabish-2005",
+        "va-agontuk-3-2005",
+        "artcell-oniket-prantor-2006",
+      ];
+      const pos = [
+        [250, 20, 9],
+        [30, 0, -10],
+        [235, 225, 5],
+        [20, 230, -6],
+        [125, 115, -1],
+      ];
+      await document.fonts.ready;
+      await Promise.all(
+        ["Anton", "Monoton", "Special Elite", "Hind Siliguri"].map((f) =>
+          document.fonts.load(`40px "${f}"`),
+        ),
+      );
+      const stack = document.getElementById("stack");
+      pick.forEach((id, i) => {
+        const a = ALBUMS.find((x) => x.id === id);
+        const [x, y, r] = pos[i];
+        const wrap = document.createElement("div");
+        wrap.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:rotate(${r}deg)`;
+        if (i === pick.length - 1) {
+          const d = document.createElement("div");
+          d.className = "disc";
+          wrap.append(d);
+        }
+        const c = document.createElement("div");
+        c.className = "case";
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 540;
+        drawCover(cv, a);
+        c.append(cv);
+        wrap.append(c);
+        stack.append(wrap);
+      });
+      document.body.dataset.ready = "1";
+    </script>
+  </body>
 </html>

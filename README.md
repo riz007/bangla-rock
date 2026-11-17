@@ -47,7 +47,7 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
 - **Generated at build**: `sitemap.xml`, `llms.txt`, `llms-full.txt` (whole catalogue as text for LLMs).
 - **Static**: `robots.txt`, `og.png` (1200×630 share image), favicons, `site.webmanifest`.
 - Regenerate the share image with `npm i --no-save @fontsource/anton @fontsource/hind-siliguri @fontsource/monoton
-  @fontsource/special-elite`, `npx vite`, then screenshot `/scripts/og/index.html` at 1200×630.
+@fontsource/special-elite`, `npx vite`, then screenshot `/scripts/og/index.html` at 1200×630.
 
 ## Run
 
