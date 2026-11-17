@@ -10,8 +10,9 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
 - **Real cover scans** — each album shows its original cover, loaded straight from the source blog, with generated
   era-styled artwork underneath as the loading state and fallback (toggle in the theme panel).
 - **Album sheets** — label, format, line-up, credits and track list for all 88 releases, plus a draggable WebGL jewel case.
-- **Crate Deck player** — a retro desktop-player that plays albums through YouTube's embedded player. 21 albums have a
-  video or playlist linked; for the rest, paste any YouTube link into the deck and it is remembered in that browser.
+- **Crate Deck player** — a retro desktop-player that plays albums through YouTube's embedded player. 81 of 88 albums have a
+  video or playlist linked, most with backups the deck falls back to if one is removed or blocks embedding. For the
+  rest, paste any YouTube link into the deck and it is remembered in that browser.
 - **Four era themes** — '70s Shadhin, '80s Cassette, '90s Photocopy, '00s Underground, with accent colour, grain,
   motion and density controls. The theme can follow the album you open.
 - **Mixtape** — save albums in the browser and play them from the list.
@@ -20,7 +21,9 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
 ## Where the content comes from
 
 - **Catalogue, covers, line-ups, credits, tracks:** [banglacdcovers.blogspot.com](https://banglacdcovers.blogspot.com/).
-  Cover images are hotlinked from the blog's own hosting, never copied into this repo. The scans are XTR's work and the
+  Cover images are read at runtime from the blog's public feed (`src/feed.ts`) and hotlinked from its own hosting,
+  never copied into this repo; `covers.json` is the fallback. The 3D case loads the same scan through the
+  [wsrv.nl](https://wsrv.nl) image proxy, because WebGL can't use images from hosts that don't send CORS headers. The scans are XTR's work and the
   artwork belongs to the bands and labels — ask him before launching publicly, and expect covers to disappear if the blog does.
 - **Music:** YouTube's IFrame player. Nothing is downloaded or re-hosted. Linked videos can be removed or have embedding
   disabled at any time; the deck then asks for another link.

@@ -149,13 +149,21 @@ export interface Details {
   lineup?: string[]
   credits?: string[]
   tracks?: string[]
-  /** YouTube video id (11 chars) or playlist id (PL…) */
-  yt?: string
+  /** YouTube video or playlist ids, best first; the player falls back down the list */
+  yt?: string[]
   ytNote?: string
 }
 
-/** Blogger image URLs carry their size in the path: /s1600/ → /s400/ */
-export const coverUrl = (a: Album, size: number) => a.cover?.replace(/\/s\d+(-c)?\//, `/s${size}/`)
+/** Blogger image URLs carry their size in the path (/s1600/, /s72-c/, /w400-h400/): ask for the size we need. */
+export const sized = (url: string, size: number) =>
+  url.replace(/\/(?:s\d+|w\d+(?:-h\d+)?|h\d+)(?:-[a-z0-9]+)*\//, `/s${size}/`).replace(/=s\d+(-c)?$/, `=s${size}`)
+
+/** Cover candidates, best first: the live feed's image, then the one recorded in covers.json. */
+export const coverUrls = (a: Album, size: number, live?: string) =>
+  [...new Set([live, a.cover].filter((u): u is string => !!u).map(u => sized(u, size)))]
+
+/** WebGL may only read images served with CORS headers, which Blogger's image host does not send. */
+export const corsSafe = (url: string) => `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg&q=88`
 
 const id = (artist: string, title: string, year: number) => slug(`${artist === VA ? 'va' : artist}-${title}-${year}`)
 

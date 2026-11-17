@@ -22,7 +22,7 @@ for line in (root / 'scripts/details.txt').read_text().splitlines():
         else: cur = details.setdefault(ids[title], {})
     elif cur is not None and ': ' in line:
         k, v = line.split(': ', 1)
-        cur[KEYS[k]] = [t.strip() for t in v.split(' / ')] if k == 'T' else [t.strip() for t in v.split('; ')] if k in 'PC' else v
+        cur[KEYS[k]] = [t.strip() for t in v.split(' / ')] if k == 'T' else [t.strip() for t in v.split('; ')] if k in ('P', 'C') else [t.strip() for t in v.split(',')] if k == 'Y' else v
 missing = [t for t, i in ids.items() if i not in covers or i not in details]
 print(len(ids), 'albums,', len(covers), 'covers,', len(details), 'details; unmatched:', bad, 'missing:', missing)
 (root / 'src/data/covers.json').write_text(json.dumps(covers, indent=0, ensure_ascii=False))

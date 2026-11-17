@@ -2,10 +2,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { coverUrl, type Album } from '../data/albums'
+import { corsSafe, coverUrls, type Album } from '../data/albums'
 import { drawCover } from '../cover'
 
-function JewelCase({ album, motion, drag, real }: { album: Album; motion: boolean; drag: { x: number; y: number }; real: boolean }) {
+function JewelCase({ album, motion, drag, real, live }: { album: Album; motion: boolean; drag: { x: number; y: number }; real: boolean; live?: string }) {
   const group = useRef<THREE.Group>(null!)
   const disc = useRef<THREE.Mesh>(null!)
   const slide = useRef<THREE.Group>(null!)
@@ -22,15 +22,22 @@ function JewelCase({ album, motion, drag, real }: { album: Album; motion: boolea
   const [tex, setTex] = useState<THREE.Texture>(art)
   useEffect(() => {
     setTex(art)
-    const url = real ? coverUrl(album, 800) : undefined
     let photo: THREE.Texture | undefined
-    if (url) {
-      const loader = new THREE.TextureLoader()
-      loader.setCrossOrigin('anonymous')
-      loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; photo = t; setTex(t) }, undefined, () => {})
+    let alive = true
+    // try each scan through the CORS-enabled image proxy; keep the generated art if none load
+    const queue = real ? coverUrls(album, 800, live).map(corsSafe) : []
+    const loader = new THREE.TextureLoader().setCrossOrigin('anonymous')
+    const next = () => {
+      const url = queue.shift()
+      if (!url || !alive) return
+      loader.load(url, t => {
+        if (!alive) return t.dispose()
+        t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; photo = t; setTex(t)
+      }, undefined, next)
     }
-    return () => { art.dispose(); photo?.dispose() }
-  }, [art, album, real])
+    next()
+    return () => { alive = false; art.dispose(); photo?.dispose() }
+  }, [art, album, real, live])
 
   useFrame((s, dt) => {
     const k = Math.min(1, dt * 6), t = s.clock.elapsedTime
@@ -69,7 +76,7 @@ function JewelCase({ album, motion, drag, real }: { album: Album; motion: boolea
   )
 }
 
-export default function CaseViewer({ album, motion, accent, real }: { album: Album; motion: boolean; accent: string; real: boolean }) {
+export default function CaseViewer({ album, motion, accent, real, live }: { album: Album; motion: boolean; accent: string; real: boolean; live?: string }) {
   const drag = useRef({ x: 0, y: 0 }).current
   useEffect(() => { drag.x = 0; drag.y = 0 }, [album, drag])
   return (
@@ -86,7 +93,7 @@ export default function CaseViewer({ album, motion, accent, real }: { album: Alb
         <ambientLight intensity={0.9} />
         <directionalLight position={[2, 3, 4]} intensity={2.4} />
         <pointLight position={[-3, -1, 2]} intensity={14} color={accent} />
-        <JewelCase album={album} motion={motion} drag={drag} real={real} />
+        <JewelCase album={album} motion={motion} drag={drag} real={real} live={live} />
       </Canvas>
       <span className="viewer-hint">drag to turn the case</span>
     </div>

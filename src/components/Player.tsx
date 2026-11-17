@@ -38,11 +38,17 @@ const clock = (t: number) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${S
 type Status = 'idle' | 'loading' | 'playing' | 'paused' | 'error' | 'blocked'
 
 export function Player(props: {
-  album: Album; source?: string; note?: string; tracks?: string[]; real: boolean
+  album: Album; sources: string[]; note?: string; tracks?: string[]; real: boolean; liveCover?: string
   playToken: number; searchUrl: string
   onStep: (d: number) => void; onClose: () => void; onLink: (id: string | null) => void
 }) {
-  const { album, source, tracks, playToken } = props
+  const { album, sources, tracks, playToken } = props
+  const sourcesKey = sources.join('|')
+  const [pick, setPick] = useState(0) // which candidate link is on the deck
+  const [retry, setRetry] = useState(0)
+  const source = sources[pick]
+  // YouTube reports removed / non-embeddable videos through onError: move on to the next candidate
+  const advance = useRef(() => {})
   const host = useRef<HTMLDivElement>(null)
   const yt = useRef<any>(null)
   const loadedSrc = useRef<string | undefined>(undefined)
@@ -80,19 +86,24 @@ export function Player(props: {
             else if (e.data === S.ENDED) setStatus('idle')
             else if (e.data === S.BUFFERING) setStatus(s => (s === 'playing' ? s : 'loading'))
           },
-          onError: () => setStatus('error'),
+          onError: () => advance.current(),
         },
       })
     } catch { setStatus('blocked') }
   }, [source, vol])
 
+  advance.current = () => {
+    if (pick + 1 < sources.length) { setPick(pick + 1); setRetry(r => r + 1) } else setStatus('error')
+  }
+  useEffect(() => { if (retry) void play() }, [retry]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const stop = useCallback(() => { yt.current?.stopVideo?.(); setStatus('idle'); setTime(0) }, [])
 
   // a new album (or a newly linked source) stops whatever was on the deck
   useEffect(() => {
-    if (loadedSrc.current && loadedSrc.current !== source) { yt.current?.stopVideo?.(); loadedSrc.current = undefined }
-    setStatus('idle'); setTime(0); setDur(0); setNow(''); setLink('')
-  }, [album.id, source])
+    if (loadedSrc.current) { yt.current?.stopVideo?.(); loadedSrc.current = undefined }
+    setPick(0); setStatus('idle'); setTime(0); setDur(0); setNow(''); setLink('')
+  }, [album.id, sourcesKey])
   useEffect(() => { if (playToken) { setMini(false); void play() } }, [playToken]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => yt.current?.destroy?.(), [])
   useEffect(() => {
@@ -118,7 +129,7 @@ export function Player(props: {
       </header>
 
       <div className="amp-lcd">
-        <span className="amp-disc"><Cover album={album} size={96} real={props.real} /></span>
+        <span className="amp-disc"><Cover album={album} size={96} real={props.real} live={props.liveCover} /></span>
         <div className="amp-read">
           <div className="amp-time">{clock(time)}<small>{dur ? ` / ${clock(dur)}` : ''}</small><b>{label}</b></div>
           <div className="amp-marquee"><span>{marquee}</span></div>
@@ -128,9 +139,9 @@ export function Player(props: {
 
       <div className="amp-body">
         <div className="amp-screen" ref={host} hidden={!source || status === 'blocked' || status === 'error' || status === 'idle' && !yt.current} />
-        {(!source || status === 'error') && (
+        {(!source || status === 'error') && (status === 'error' || !sources.length) && (
           <form className="amp-note" onSubmit={submit}>
-            <p>{source ? 'That video can’t be played here (removed, or embedding is off).' : 'No YouTube track is linked to this album yet.'} Paste a video or playlist link — it’s saved in this browser.</p>
+            <p>{sources.length ? 'None of the linked videos can play here (removed, or embedding is off).' : 'No YouTube track is linked to this album yet.'} Paste a video or playlist link — it’s saved in this browser.</p>
             <span><input value={link} onChange={e => setLink(e.target.value)} placeholder="https://youtube.com/watch?v=…" aria-label="YouTube link" /><button disabled={!parseYouTube(link)}>Load</button></span>
             <a href={props.searchUrl} target="_blank" rel="noreferrer">Find it on YouTube ↗</a>
           </form>
@@ -141,7 +152,9 @@ export function Player(props: {
             <a href={source ? `https://www.youtube.com/${isList(source) ? `playlist?list=${source}` : `watch?v=${source}`}` : props.searchUrl} target="_blank" rel="noreferrer">Open on YouTube ↗</a>
           </p>
         )}
-        {props.note && source && <p className="amp-note small">Linked: {props.note}.</p>}
+        {source && (props.note || pick > 0) && (
+          <p className="amp-note small">{pick > 0 ? `Link ${pick} wasn’t playable, so this is backup ${pick + 1} of ${sources.length}.` : `Linked: ${props.note}.`}</p>
+        )}
 
         <input className="amp-seek" type="range" min={0} max={dur || 1} step={1} value={Math.min(time, dur || 1)} disabled={!dur}
           onChange={e => { const t = +e.target.value; setTime(t); yt.current?.seekTo?.(t, true) }} aria-label="Seek" />

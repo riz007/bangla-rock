@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react
 import { ALBUMS, ARTISTS, ERAS, GENRES, SOURCE, type Album, type Details, type Genre } from './data/albums'
 import { Cover } from './components/Cover'
 import { Player } from './components/Player'
+import { liveCovers } from './feed'
 import { THEMES, loadList, loadMap, loadPrefs, save, savePrefs, themeFor, type Prefs } from './theme'
 
 const CaseViewer = lazy(() => import('./components/CaseViewer'))
@@ -30,6 +31,7 @@ export default function App() {
   const [details, setDetails] = useState<Record<string, Details>>({})
   const [links, setLinks] = useState(() => loadMap('bcc:yt')) // the listener's own YouTube links
   const [playToken, setPlayToken] = useState(0)
+  const [live, setLive] = useState<Record<string, string>>({}) // cover URLs read from the blog's own feed
 
   const open = byId.get(openId) ?? null
   const spinning = (spinId && byId.get(spinId)) || null
@@ -46,6 +48,7 @@ export default function App() {
   }, [prefs, theme, accent])
   useEffect(() => save('bcc:mixtape', tape), [tape])
   useEffect(() => save('bcc:yt', links), [links])
+  useEffect(() => { if (prefs.real) void liveCovers().then(setLive) }, [prefs.real])
   // line-ups, credits and track lists load on first use, not with the grid
   const wantDetails = !!(openId || spinId)
   useEffect(() => {
@@ -87,7 +90,7 @@ export default function App() {
     open ? go(next.id) : setSpinId(next.id)
   }
   const info = open ? details[open.id] : undefined
-  const sourceOf = (a: Album) => links[a.id] ?? details[a.id]?.yt
+  const sourceOf = (a: Album) => [links[a.id], ...(details[a.id]?.yt ?? [])].filter((s): s is string => !!s)
   const playAlbum = (a: Album) => { setSpinId(a.id); setPlayToken(t => t + 1) }
   const toggleTape = (id: string) => setTape(t => (t.includes(id) ? t.filter(x => x !== id) : [...t, id]))
   const set = (p: Partial<Prefs>) => setPrefs(v => ({ ...v, ...p }))
@@ -148,7 +151,7 @@ export default function App() {
       <main className={`crate${prefs.dense ? ' dense' : ''}`}>
         {list.map(a => (
           <a key={a.id} className="sleeve" href={`#${a.id}`} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
-            <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} real={prefs.real} /></span>
+            <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} real={prefs.real} live={live[a.id]} /></span>
             <span className="sleeve-meta">
               <strong>{a.title}</strong>
               <span>{a.artist} · {a.year}</span>
@@ -170,8 +173,8 @@ export default function App() {
         <div className="sheet-wrap" onClick={e => e.target === e.currentTarget && go(null)}>
           <article className="sheet" role="dialog" aria-modal="true" aria-label={`${open.title} by ${open.artist}`}>
             <button className="close" onClick={() => go(null)} aria-label="Close">×</button>
-            <Suspense fallback={<div className="viewer"><Cover album={open} size={512} real={prefs.real} /></div>}>
-              <CaseViewer album={open} motion={prefs.motion} accent={accent} real={prefs.real} />
+            <Suspense fallback={<div className="viewer"><Cover album={open} size={512} real={prefs.real} live={live[open.id]} /></div>}>
+              <CaseViewer album={open} motion={prefs.motion} accent={accent} real={prefs.real} live={live[open.id]} />
             </Suspense>
             <div className="sheet-body">
               <p className="kicker">{GENRES[open.genre]} · {open.year}</p>
@@ -268,8 +271,8 @@ export default function App() {
 
       {spinning && (
         <Player
-          album={spinning} source={sourceOf(spinning)} note={links[spinning.id] ? 'your own link' : details[spinning.id]?.ytNote}
-          tracks={details[spinning.id]?.tracks} real={prefs.real} playToken={playToken} searchUrl={yt(spinning)}
+          album={spinning} sources={sourceOf(spinning)} note={links[spinning.id] ? 'your own link' : details[spinning.id]?.ytNote}
+          tracks={details[spinning.id]?.tracks} real={prefs.real} liveCover={live[spinning.id]} playToken={playToken} searchUrl={yt(spinning)}
           onStep={step} onClose={() => setSpinId(null)}
           onLink={id => setLinks(l => { const n = { ...l }; if (id) n[spinning.id] = id; else delete n[spinning.id]; return n })}
         />

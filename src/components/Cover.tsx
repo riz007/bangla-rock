@@ -1,21 +1,23 @@
 import { memo, useEffect, useRef, useState } from 'react'
-import { coverUrl, type Album } from '../data/albums'
+import { coverUrls, type Album } from '../data/albums'
 import { drawCover } from '../cover'
 
-/** Generative artwork on a canvas; the real scan fades in on top when enabled and reachable. */
-export const Cover = memo(function Cover({ album, size = 320, real = false }: { album: Album; size?: number; real?: boolean }) {
+/** Generated artwork on a canvas; the real scan fades in on top and the next candidate URL is tried if one fails. */
+export const Cover = memo(function Cover({ album, size = 320, real = false, live }: { album: Album; size?: number; real?: boolean; live?: string }) {
   const ref = useRef<HTMLCanvasElement>(null)
-  const [failed, setFailed] = useState(false)
+  const urls = real ? coverUrls(album, size > 400 ? 900 : 400, live) : []
+  const key = urls.join('|')
+  const [i, setI] = useState(0)
   const [loaded, setLoaded] = useState(false)
-  const src = real && !failed ? coverUrl(album, size > 400 ? 900 : 400) : undefined
+  const src = urls[i]
 
-  useEffect(() => { setFailed(false); setLoaded(false) }, [album, real])
+  useEffect(() => { setI(0); setLoaded(false) }, [key])
   useEffect(() => {
-    let live = true
-    const paint = () => { if (live && ref.current) drawCover(ref.current, album) }
+    let alive = true
+    const paint = () => { if (alive && ref.current) drawCover(ref.current, album) }
     paint()
     document.fonts?.ready.then(paint) // repaint once display fonts arrive
-    return () => { live = false }
+    return () => { alive = false }
   }, [album])
 
   return (
@@ -23,8 +25,8 @@ export const Cover = memo(function Cover({ album, size = 320, real = false }: { 
       <canvas ref={ref} width={size} height={size} aria-hidden="true" />
       {src && (
         <img
-          src={src} alt={`Cover of ${album.title} by ${album.artist}`} loading="lazy" decoding="async" referrerPolicy="no-referrer"
-          className={loaded ? 'in' : ''} onLoad={() => setLoaded(true)} onError={() => setFailed(true)}
+          key={src} src={src} alt={`Cover of ${album.title} by ${album.artist}`} loading="lazy" decoding="async" referrerPolicy="no-referrer"
+          className={loaded ? 'in' : ''} onLoad={() => setLoaded(true)} onError={() => { setLoaded(false); setI(n => n + 1) }}
         />
       )}
     </span>
