@@ -7,22 +7,31 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
 ## What it does
 
 - **Dig the crate** — search by album, band, year, label or Bangla name; filter by era and by category.
-- **Four era themes** — '70s Shadhin, '80s Cassette, '90s Photocopy, '00s Underground. Pick one, change the
-  accent colour, toggle grain, motion and density. The theme can also follow the album you open.
-- **3D jewel case** — opening an album loads a small WebGL scene (React Three Fiber): drag the case, the disc spins.
-- **Mixtape + now-spinning deck** — save albums in the browser, step through the crate, jump out to YouTube or Spotify.
+- **Real cover scans** — each album shows its original cover, loaded straight from the source blog, with generated
+  era-styled artwork underneath as the loading state and fallback (toggle in the theme panel).
+- **Album sheets** — label, format, line-up, credits and track list for all 88 releases, plus a draggable WebGL jewel case.
+- **Crate Deck player** — a retro desktop-player that plays albums through YouTube's embedded player. 21 albums have a
+  video or playlist linked; for the rest, paste any YouTube link into the deck and it is remembered in that browser.
+- **Four era themes** — '70s Shadhin, '80s Cassette, '90s Photocopy, '00s Underground, with accent colour, grain,
+  motion and density controls. The theme can follow the album you open.
+- **Mixtape** — save albums in the browser and play them from the list.
 - **Deep links** — every album has a URL (`#artcell-oniket-prantor-2006`).
 
-## About the artwork
+## Where the content comes from
 
-Cover images here are **original generative art** (`src/cover.ts`), seeded per album and styled by era and genre.
-They are not the real album covers. Each album links to its original scan, line-up and credits on the source blog.
-No audio is hosted; "Listen" opens a search on YouTube or Spotify.
+- **Catalogue, covers, line-ups, credits, tracks:** [banglacdcovers.blogspot.com](https://banglacdcovers.blogspot.com/).
+  Cover images are hotlinked from the blog's own hosting, never copied into this repo. The scans are XTR's work and the
+  artwork belongs to the bands and labels — ask him before launching publicly, and expect covers to disappear if the blog does.
+- **Music:** YouTube's IFrame player. Nothing is downloaded or re-hosted. Linked videos can be removed or have embedding
+  disabled at any time; the deck then asks for another link.
+- **Category grouping and band notes** are editorial.
 
-## Editing the catalogue
+## Editing the data
 
-`src/data/albums.ts` holds everything: one row per release, the artist → category map, era ranges and short band notes.
-Titles, years and featured-artist tags follow the blog's labels. Category grouping and band notes are editorial — correct them freely.
+- `src/data/albums.ts` — one row per release, artist → category map, era ranges, band notes.
+- `scripts/covers.txt`, `scripts/details.txt` — cover references and per-album details (`Y:` is the YouTube video or
+  playlist id). Run `python3 scripts/build-data.py` to regenerate `src/data/covers.json` and `details.json`; it fails
+  if an album is missing or a title does not match.
 
 ## Run
 
@@ -33,6 +42,7 @@ npm run build    # type-check + production build to dist/
 ```
 
 Static output; deploys as-is to Vercel, Netlify or GitHub Pages (`base: './'`).
-First load is about 85 kB gzipped; three.js (about 245 kB gzipped) only loads when an album is opened.
+First load is about 100 kB gzipped; album details (13 kB) and three.js (about 245 kB) load when an album is opened,
+and the YouTube player loads only when you press play.
 
 Stack: Vite, React 19, TypeScript, three.js + @react-three/fiber, plain CSS custom properties for theming.
