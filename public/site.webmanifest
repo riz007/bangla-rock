@@ -1,0 +1,17 @@
+{
+  "name": "Bangla Rock Crate — বাংলা রক ক্রেট",
+  "short_name": "Rock Crate",
+  "description": "Bangladeshi rock and metal albums from 1990 to 2013, with cover art, line-ups and a player.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d",
+  "lang": "en",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

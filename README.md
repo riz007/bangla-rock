@@ -36,6 +36,19 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
   playlist id). Run `python3 scripts/build-data.py` to regenerate `src/data/covers.json` and `details.json`; it fails
   if an album is missing or a title does not match.
 
+## SEO, analytics and crawlers
+
+- **Google Tag Manager** (`GTM-54KR7LRC`) in `index.html`, plus a `page_view` event pushed to `dataLayer` on every in-app
+  navigation (`page_path`, `page_title`). Set up a GA4 tag in GTM triggered on that custom event to count album views.
+- **One real page per album** at `/album/<id>/`, pre-rendered at build by `scripts/seo-plugin.ts` with its own title,
+  description, canonical, Open Graph / Twitter tags, `MusicAlbum` + `BreadcrumbList` JSON-LD and crawlable HTML (tracks,
+  line-up, credits) that the app replaces when it boots. Old `#<id>` links still work.
+- **Home page**: `WebSite` + `CollectionPage` JSON-LD listing every album, and a crawlable list of all album links.
+- **Generated at build**: `sitemap.xml`, `llms.txt`, `llms-full.txt` (whole catalogue as text for LLMs).
+- **Static**: `robots.txt`, `og.png` (1200×630 share image), favicons, `site.webmanifest`.
+- Regenerate the share image with `npm i --no-save @fontsource/anton @fontsource/hind-siliguri @fontsource/monoton
+  @fontsource/special-elite`, `npx vite`, then screenshot `/scripts/og/index.html` at 1200×630.
+
 ## Run
 
 ```bash

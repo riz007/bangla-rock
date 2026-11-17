@@ -1,0 +1,5 @@
+# Bangla Rock Crate — search engines and AI crawlers are all welcome.
+User-agent: *
+Allow: /
+
+Sitemap: https://banglarock.riz1.dev/sitemap.xml

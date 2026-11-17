@@ -236,3 +236,10 @@ small { font-size: .72em; }
   .sheet { max-height: none; }
   .amp { right: .5rem; left: .5rem; width: auto; }
 }
+
+/* ── Pre-rendered crawlable content (replaced by the app once it boots) ── */
+.seo { max-width: 72ch; margin: 0 auto; padding: 2rem 1.25rem 4rem; color: #e7e9ec; background: #0b0b0d; font: 16px/1.6 'Hind Siliguri', system-ui, sans-serif; }
+.seo h1 { font: 400 2.4rem/1.05 Anton, Impact, sans-serif; text-transform: uppercase; }
+.seo h2 { font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: #8b929b; margin-top: 1.6rem; }
+.seo a { color: #ff5a63; }
+.seo ul, .seo ol { padding-left: 1.3rem; }

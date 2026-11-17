@@ -3,6 +3,7 @@ import { ALBUMS, ARTISTS, ERAS, GENRES, SOURCE, type Album, type Details, type G
 import { Cover } from './components/Cover'
 import { Player } from './components/Player'
 import { liveCovers } from './feed'
+import { SITE, SITE_TITLE, albumPath, albumTitle, describe } from './seo'
 import { THEMES, loadList, loadMap, loadPrefs, save, savePrefs, themeFor, type Prefs } from './theme'
 
 const CaseViewer = lazy(() => import('./components/CaseViewer'))
@@ -10,21 +11,25 @@ const CaseViewer = lazy(() => import('./components/CaseViewer'))
 const byId = new Map(ALBUMS.map(a => [a.id, a]))
 const yt = (a: Album) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${a.artist === 'Various Artists' ? '' : a.artist} ${a.title} full album`)}`
 const spotify = (a: Album) => `https://open.spotify.com/search/${encodeURIComponent(`${a.artist === 'Various Artists' ? '' : a.artist} ${a.title}`.trim())}`
-const hashId = () => location.hash.replace(/^#\/?(album\/)?/, '')
+/** Album pages live at /album/<id>/ (pre-rendered for search engines); old #<id> links still open. */
+const routeId = () =>
+  location.pathname.match(/\/album\/([a-z0-9-]+)\/?$/)?.[1] ?? location.hash.replace(/^#\/?(album\/)?/, '')
 
-function describe(a: Album) {
-  const kind = a.genre === 'mix'
-    ? `A band mixed album from ${a.year} gathering ${a.with.length} acts on one disc — the format that carried the Dhaka underground from rehearsal pads to record shops.`
-    : `${a.title === a.artist ? 'The self-titled release' : 'A release'} by ${a.artist}, ${a.year}. Filed under ${GENRES[a.genre].toLowerCase()}.`
-  return [kind, ARTISTS[a.artist]?.note, a.label && `Released on ${a.label}.`].filter(Boolean).join(' ')
+declare global { interface Window { dataLayer?: unknown[] } }
+const track = (path: string, title: string) => { (window.dataLayer ??= []).push({ event: 'page_view', page_path: path, page_location: location.href, page_title: title }) }
+/** Follow a same-site link inside the app unless the visitor asked for a new tab or window. */
+const spa = (e: React.MouseEvent, fn: () => void) => {
+  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  e.preventDefault(); fn()
 }
+
 
 export default function App() {
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs)
   const [q, setQ] = useState('')
   const [era, setEra] = useState<string | null>(null)
   const [genre, setGenre] = useState<Genre | null>(null)
-  const [openId, setOpenId] = useState(hashId)
+  const [openId, setOpenId] = useState(routeId)
   const [spinId, setSpinId] = useState<string | null>(null)
   const [tape, setTape] = useState<string[]>(() => loadList('bcc:mixtape').filter(id => byId.has(id)))
   const [panel, setPanel] = useState<'theme' | 'tape' | null>(null)
@@ -55,15 +60,26 @@ export default function App() {
     if (wantDetails) void import('./data/details.json').then(m => setDetails(m.default as Record<string, Details>))
   }, [wantDetails])
   useEffect(() => {
-    const on = () => setOpenId(hashId())
+    // upgrade a legacy #id link to its real page URL
+    if (location.hash && byId.has(routeId())) history.replaceState(null, '', `/album/${routeId()}/`)
+    const on = () => setOpenId(routeId())
+    addEventListener('popstate', on)
     addEventListener('hashchange', on)
-    return () => removeEventListener('hashchange', on)
+    return () => { removeEventListener('popstate', on); removeEventListener('hashchange', on) }
   }, [])
+  // keep title + canonical in step with the open album, and tell Tag Manager about the virtual page view
+  useEffect(() => {
+    const title = open ? albumTitle(open) : SITE_TITLE
+    const path = open ? albumPath(open) : '/'
+    document.title = title
+    document.querySelector('link[rel=canonical]')?.setAttribute('href', SITE + path)
+    track(path, title)
+  }, [open])
   useEffect(() => { if (open) setSpinId(open.id) }, [open])
 
   const go = useCallback((id: string | null) => {
-    // plain #id hashes so links survive sandboxed hosts and static deploys alike
-    location.hash = id ?? ''
+    const path = id ? `/album/${id}/` : '/'
+    if (location.pathname + location.hash !== path) history.pushState(null, '', path + location.search)
     setOpenId(id ?? '')
   }, [])
   useEffect(() => {
@@ -99,7 +115,7 @@ export default function App() {
   return (
     <>
       <header className="top">
-        <a className="brand" href="#" onClick={e => { e.preventDefault(); search('') }}>
+        <a className="brand" href="/" onClick={e => spa(e, () => search(''))}>
           <span className="brand-disc" aria-hidden="true" />
           <span>
             <strong>Bangla Rock Crate</strong>
@@ -150,7 +166,7 @@ export default function App() {
 
       <main className={`crate${prefs.dense ? ' dense' : ''}`}>
         {list.map(a => (
-          <a key={a.id} className="sleeve" href={`#${a.id}`} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
+          <a key={a.id} className="sleeve" href={albumPath(a)} onClick={e => spa(e, () => go(a.id))} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
             <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} real={prefs.real} live={live[a.id]} /></span>
             <span className="sleeve-meta">
               <strong>{a.title}</strong>
@@ -259,7 +275,7 @@ export default function App() {
               const a = byId.get(id)!
               return (
                 <li key={id}>
-                  <a href={`#${id}`} onClick={() => setPanel(null)}><strong>{a.title}</strong><span>{a.artist} · {a.year}</span></a>
+                  <a href={albumPath(a)} onClick={e => spa(e, () => { setPanel(null); go(id) })}><strong>{a.title}</strong><span>{a.artist} · {a.year}</span></a>
                   <button onClick={() => playAlbum(a)} aria-label={`Play ${a.title}`}>▶</button>
                   <button onClick={() => toggleTape(id)} aria-label={`Remove ${a.title}`}>×</button>
                 </li>
