@@ -1,16 +1,16 @@
 // Lazy-loaded WebGL jewel case. three.js only downloads when an album is opened.
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { Album } from '../data/albums'
+import { coverUrl, type Album } from '../data/albums'
 import { drawCover } from '../cover'
 
-function JewelCase({ album, motion, drag }: { album: Album; motion: boolean; drag: { x: number; y: number } }) {
+function JewelCase({ album, motion, drag, real }: { album: Album; motion: boolean; drag: { x: number; y: number }; real: boolean }) {
   const group = useRef<THREE.Group>(null!)
   const disc = useRef<THREE.Mesh>(null!)
   const slide = useRef<THREE.Group>(null!)
 
-  const tex = useMemo(() => {
+  const art = useMemo(() => {
     const cv = document.createElement('canvas')
     cv.width = cv.height = 512
     drawCover(cv, album)
@@ -19,7 +19,18 @@ function JewelCase({ album, motion, drag }: { album: Album; motion: boolean; dra
     t.anisotropy = 4
     return t
   }, [album])
-  useEffect(() => () => tex.dispose(), [tex])
+  const [tex, setTex] = useState<THREE.Texture>(art)
+  useEffect(() => {
+    setTex(art)
+    const url = real ? coverUrl(album, 800) : undefined
+    let photo: THREE.Texture | undefined
+    if (url) {
+      const loader = new THREE.TextureLoader()
+      loader.setCrossOrigin('anonymous')
+      loader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; photo = t; setTex(t) }, undefined, () => {})
+    }
+    return () => { art.dispose(); photo?.dispose() }
+  }, [art, album, real])
 
   useFrame((s, dt) => {
     const k = Math.min(1, dt * 6), t = s.clock.elapsedTime
@@ -35,7 +46,7 @@ function JewelCase({ album, motion, drag }: { album: Album; motion: boolean; dra
       <mesh>
         <boxGeometry args={[1.42, 1.25, 0.1]} />
         {[0, 1, 2, 3].map(i => <meshStandardMaterial key={i} attach={`material-${i}`} color="#17171c" roughness={0.3} metalness={0.2} />)}
-        <meshStandardMaterial attach="material-4" map={tex} roughness={0.32} />
+        <meshStandardMaterial key={tex.uuid} attach="material-4" map={tex} roughness={0.32} />
         <meshStandardMaterial attach="material-5" color="#101014" roughness={0.3} />
       </mesh>
       <mesh position={[-0.76, 0, 0]}>
@@ -46,7 +57,7 @@ function JewelCase({ album, motion, drag }: { album: Album; motion: boolean; dra
         <mesh ref={disc}>
           <cylinderGeometry args={[0.58, 0.58, 0.012, 72]} />
           <meshPhysicalMaterial attach="material-0" color="#cfd4da" metalness={1} roughness={0.2} />
-          <meshPhysicalMaterial attach="material-1" map={tex} metalness={0.55} roughness={0.28} iridescence={1} iridescenceIOR={1.9} />
+          <meshPhysicalMaterial key={tex.uuid} attach="material-1" map={tex} metalness={0.55} roughness={0.28} iridescence={1} iridescenceIOR={1.9} />
           <meshPhysicalMaterial attach="material-2" color="#dfe3ea" metalness={1} roughness={0.16} iridescence={1} iridescenceIOR={2.1} />
         </mesh>
         <mesh>
@@ -58,7 +69,7 @@ function JewelCase({ album, motion, drag }: { album: Album; motion: boolean; dra
   )
 }
 
-export default function CaseViewer({ album, motion, accent }: { album: Album; motion: boolean; accent: string }) {
+export default function CaseViewer({ album, motion, accent, real }: { album: Album; motion: boolean; accent: string; real: boolean }) {
   const drag = useRef({ x: 0, y: 0 }).current
   useEffect(() => { drag.x = 0; drag.y = 0 }, [album, drag])
   return (
@@ -75,7 +86,7 @@ export default function CaseViewer({ album, motion, accent }: { album: Album; mo
         <ambientLight intensity={0.9} />
         <directionalLight position={[2, 3, 4]} intensity={2.4} />
         <pointLight position={[-3, -1, 2]} intensity={14} color={accent} />
-        <JewelCase album={album} motion={motion} drag={drag} />
+        <JewelCase album={album} motion={motion} drag={drag} real={real} />
       </Canvas>
       <span className="viewer-hint">drag to turn the case</span>
     </div>

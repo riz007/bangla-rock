@@ -24,16 +24,20 @@ export interface Prefs {
   motion: boolean
   follow: boolean // switch theme to match the open album
   dense: boolean
+  real: boolean // show the original cover scans (hotlinked from the source blog)
 }
 
 const KEY = 'bcc:prefs'
 export const defaultPrefs: Prefs = {
-  theme: 'y2k', accent: null, grain: true, follow: true, dense: false,
+  theme: 'y2k', accent: null, grain: true, follow: true, dense: false, real: true,
   motion: typeof matchMedia === 'undefined' || !matchMedia('(prefers-reduced-motion: reduce)').matches,
 }
 
 export const load = <T,>(key: string, fallback: T): T => {
   try { return { ...fallback, ...JSON.parse(localStorage.getItem(key) ?? '{}') } } catch { return fallback }
+}
+export const loadMap = (key: string): Record<string, string> => {
+  try { const v = JSON.parse(localStorage.getItem(key) ?? '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {} } catch { return {} }
 }
 export const loadList = (key: string): string[] => {
   try { const v = JSON.parse(localStorage.getItem(key) ?? '[]'); return Array.isArray(v) ? v : [] } catch { return [] }

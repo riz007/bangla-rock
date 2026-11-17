@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { ALBUMS, ARTISTS, ERAS, GENRES, SOURCE, type Album, type Genre } from './data/albums'
+import { ALBUMS, ARTISTS, ERAS, GENRES, SOURCE, type Album, type Details, type Genre } from './data/albums'
 import { Cover } from './components/Cover'
-import { THEMES, loadList, loadPrefs, save, savePrefs, themeFor, type Prefs } from './theme'
+import { Player } from './components/Player'
+import { THEMES, loadList, loadMap, loadPrefs, save, savePrefs, themeFor, type Prefs } from './theme'
 
 const CaseViewer = lazy(() => import('./components/CaseViewer'))
 
@@ -26,6 +27,9 @@ export default function App() {
   const [spinId, setSpinId] = useState<string | null>(null)
   const [tape, setTape] = useState<string[]>(() => loadList('bcc:mixtape').filter(id => byId.has(id)))
   const [panel, setPanel] = useState<'theme' | 'tape' | null>(null)
+  const [details, setDetails] = useState<Record<string, Details>>({})
+  const [links, setLinks] = useState(() => loadMap('bcc:yt')) // the listener's own YouTube links
+  const [playToken, setPlayToken] = useState(0)
 
   const open = byId.get(openId) ?? null
   const spinning = (spinId && byId.get(spinId)) || null
@@ -41,6 +45,12 @@ export default function App() {
     savePrefs(prefs)
   }, [prefs, theme, accent])
   useEffect(() => save('bcc:mixtape', tape), [tape])
+  useEffect(() => save('bcc:yt', links), [links])
+  // line-ups, credits and track lists load on first use, not with the grid
+  const wantDetails = !!(openId || spinId)
+  useEffect(() => {
+    if (wantDetails) void import('./data/details.json').then(m => setDetails(m.default as Record<string, Details>))
+  }, [wantDetails])
   useEffect(() => {
     const on = () => setOpenId(hashId())
     addEventListener('hashchange', on)
@@ -76,6 +86,9 @@ export default function App() {
     const next = pool[(i + d + pool.length) % pool.length]
     open ? go(next.id) : setSpinId(next.id)
   }
+  const info = open ? details[open.id] : undefined
+  const sourceOf = (a: Album) => links[a.id] ?? details[a.id]?.yt
+  const playAlbum = (a: Album) => { setSpinId(a.id); setPlayToken(t => t + 1) }
   const toggleTape = (id: string) => setTape(t => (t.includes(id) ? t.filter(x => x !== id) : [...t, id]))
   const set = (p: Partial<Prefs>) => setPrefs(v => ({ ...v, ...p }))
   const search = (term: string) => { setQ(term); setEra(null); setGenre(null); go(null); scrollTo({ top: 0 }) }
@@ -109,8 +122,8 @@ export default function App() {
         <h1>The sound of <span>Dhaka</span>, sleeve by sleeve.</h1>
         <p className="lede">
           From the first heavy records of 1990 to the mixed-album underground of the 2000s. Pick an era, pick a mood,
-          and change the room to match. Artwork here is original generative art; the real scans and credits live on{' '}
-          <a href={SOURCE} target="_blank" rel="noreferrer">XTR’s Bangla CD Covers archive</a>.
+          and change the room to match. Cover scans, line-ups and credits come from{' '}
+          <a href={SOURCE} target="_blank" rel="noreferrer">XTR’s Bangla CD Covers archive</a>; music plays through YouTube.
         </p>
       </section>
 
@@ -135,7 +148,7 @@ export default function App() {
       <main className={`crate${prefs.dense ? ' dense' : ''}`}>
         {list.map(a => (
           <a key={a.id} className="sleeve" href={`#${a.id}`} style={{ '--tilt': `${((a.id.length * 7) % 5) - 2}deg` } as React.CSSProperties}>
-            <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} /></span>
+            <span className="sleeve-art"><span className="sleeve-disc" aria-hidden="true" /><Cover album={a} real={prefs.real} /></span>
             <span className="sleeve-meta">
               <strong>{a.title}</strong>
               <span>{a.artist} · {a.year}</span>
@@ -149,19 +162,19 @@ export default function App() {
 
       <footer className="foot">
         Catalogue data from <a href={SOURCE} target="_blank" rel="noreferrer">banglacdcovers.blogspot.com</a>, collected and scanned by
-        Shohail Ibne Mahbub (XTR) since 2012. Cover images on this site are original generative artwork, not the album covers.
-        All music and original artwork belong to the artists and labels.
+        Shohail Ibne Mahbub (XTR) since 2012. Cover scans load directly from his blog; the patterned artwork behind them is generated.
+        Music plays through YouTube’s embedded player. All music and artwork belong to the artists and labels.
       </footer>
 
       {open && (
         <div className="sheet-wrap" onClick={e => e.target === e.currentTarget && go(null)}>
           <article className="sheet" role="dialog" aria-modal="true" aria-label={`${open.title} by ${open.artist}`}>
             <button className="close" onClick={() => go(null)} aria-label="Close">×</button>
-            <Suspense fallback={<div className="viewer"><Cover album={open} size={512} /></div>}>
-              <CaseViewer album={open} motion={prefs.motion} accent={accent} />
+            <Suspense fallback={<div className="viewer"><Cover album={open} size={512} real={prefs.real} /></div>}>
+              <CaseViewer album={open} motion={prefs.motion} accent={accent} real={prefs.real} />
             </Suspense>
             <div className="sheet-body">
-              <p className="kicker">{GENRES[open.genre]} · {open.year}{open.label ? ` · ${open.label}` : ''}</p>
+              <p className="kicker">{GENRES[open.genre]} · {open.year}</p>
               <h2>{open.title}</h2>
               <p className="artist">
                 {open.artist === 'Various Artists' ? open.artist : <button className="link" onClick={() => search(open.artist)}>{open.artist}</button>}
@@ -177,13 +190,28 @@ export default function App() {
                 </>
               )}
               <div className="cta">
-                <a className="btn primary" href={yt(open)} target="_blank" rel="noreferrer">▶ Listen on YouTube</a>
+                <button className="btn primary" onClick={() => playAlbum(open)}>▶ Play on the deck</button>
+                <a className="btn" href={yt(open)} target="_blank" rel="noreferrer">YouTube</a>
                 <a className="btn" href={spotify(open)} target="_blank" rel="noreferrer">Spotify</a>
                 <button className="btn" onClick={() => toggleTape(open.id)} aria-pressed={tape.includes(open.id)}>
                   {tape.includes(open.id) ? '✓ On your mixtape' : '+ Add to mixtape'}
                 </button>
               </div>
-              <a className="source" href={open.src} target="_blank" rel="noreferrer">See the real cover scan, line-up and credits on Bangla CD Covers ↗</a>
+              {info && (
+                <dl className="facts">
+                  {(info.label ?? open.label) && <><dt>Label</dt><dd>{info.label ?? open.label}</dd></>}
+                  {info.format && <><dt>Format</dt><dd>{info.format}</dd></>}
+                  {info.lineup && <><dt>Line-up</dt><dd>{info.lineup.join(' · ')}</dd></>}
+                  {info.credits && <><dt>Credits</dt><dd>{info.credits.join(' · ')}</dd></>}
+                </dl>
+              )}
+              {info?.tracks && (
+                <>
+                  <h3>Tracks</h3>
+                  <ol className="tracks">{info.tracks.map((t, i) => <li key={i}>{t}</li>)}</ol>
+                </>
+              )}
+              <a className="source" href={open.src} target="_blank" rel="noreferrer">All scans, inlay and full notes on Bangla CD Covers ↗</a>
             </div>
           </article>
         </div>
@@ -206,6 +234,7 @@ export default function App() {
             </span>
           </label>
           {([
+            ['real', 'Real cover scans (off = generated art)'],
             ['follow', 'Match the theme to the album I open'],
             ['grain', 'Paper grain & print texture'],
             ['motion', 'Spinning discs & motion'],
@@ -228,7 +257,7 @@ export default function App() {
               return (
                 <li key={id}>
                   <a href={`#${id}`} onClick={() => setPanel(null)}><strong>{a.title}</strong><span>{a.artist} · {a.year}</span></a>
-                  <a href={yt(a)} target="_blank" rel="noreferrer" aria-label={`Listen to ${a.title} on YouTube`}>▶</a>
+                  <button onClick={() => playAlbum(a)} aria-label={`Play ${a.title}`}>▶</button>
                   <button onClick={() => toggleTape(id)} aria-label={`Remove ${a.title}`}>×</button>
                 </li>
               )
@@ -238,18 +267,12 @@ export default function App() {
       )}
 
       {spinning && (
-        <div className="deck">
-          <a className="deck-now" href={`#${spinning.id}`}>
-            <span className="deck-disc"><Cover album={spinning} size={96} /></span>
-            <span><small>Now spinning</small><strong>{spinning.title}</strong><span>{spinning.artist} · {spinning.year}</span></span>
-          </a>
-          <div className="deck-ctl">
-            <button onClick={() => step(-1)} aria-label="Previous album">⏮</button>
-            <a className="play" href={yt(spinning)} target="_blank" rel="noreferrer" aria-label={`Listen to ${spinning.title} on YouTube`}>▶</a>
-            <button onClick={() => step(1)} aria-label="Next album">⏭</button>
-            <button onClick={() => setSpinId(null)} aria-label="Stop">⏹</button>
-          </div>
-        </div>
+        <Player
+          album={spinning} source={sourceOf(spinning)} note={links[spinning.id] ? 'your own link' : details[spinning.id]?.ytNote}
+          tracks={details[spinning.id]?.tracks} real={prefs.real} playToken={playToken} searchUrl={yt(spinning)}
+          onStep={step} onClose={() => setSpinId(null)}
+          onLink={id => setLinks(l => { const n = { ...l }; if (id) n[spinning.id] = id; else delete n[spinning.id]; return n })}
+        />
       )}
     </>
   )

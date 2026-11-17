@@ -2,6 +2,8 @@
 // (collected and scanned by Shohail Ibne Mahbub, "XTR"). Titles, years and
 // featured-artist tags follow the blog's own labels. Genre grouping is editorial.
 
+import covers from './covers.json'
+
 export type Genre = 'heavy' | 'rock' | 'folk' | 'pop' | 'mix'
 
 export interface Album {
@@ -13,6 +15,8 @@ export interface Album {
   /** other artists / bands tagged on the release */
   with: string[]
   label?: string
+  /** original cover scan, hosted by the source blog (hotlinked, never copied into this repo) */
+  cover?: string
   /** path of the original post on the source blog */
   src: string
 }
@@ -139,8 +143,25 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 
 export const SOURCE = 'https://banglacdcovers.blogspot.com/'
 
+export interface Details {
+  format?: string
+  label?: string
+  lineup?: string[]
+  credits?: string[]
+  tracks?: string[]
+  /** YouTube video id (11 chars) or playlist id (PL…) */
+  yt?: string
+  ytNote?: string
+}
+
+/** Blogger image URLs carry their size in the path: /s1600/ → /s400/ */
+export const coverUrl = (a: Album, size: number) => a.cover?.replace(/\/s\d+(-c)?\//, `/s${size}/`)
+
+const id = (artist: string, title: string, year: number) => slug(`${artist === VA ? 'va' : artist}-${title}-${year}`)
+
 export const ALBUMS: Album[] = rows.map(([title, artist, year, src, w, label]) => ({
-  id: slug(`${artist === VA ? 'va' : artist}-${title}-${year}`),
+  id: id(artist, title, year),
+  cover: (covers as Record<string, string>)[id(artist, title, year)],
   title,
   artist,
   year,
