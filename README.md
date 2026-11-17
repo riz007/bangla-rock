@@ -10,8 +10,8 @@ collected and scanned by Shohail Ibne Mahbub (XTR).
 - **Real cover scans** — each album shows its original cover, loaded straight from the source blog, with generated
   era-styled artwork underneath as the loading state and fallback (toggle in the theme panel).
 - **Album sheets** — label, format, line-up, credits and track list for all 88 releases, plus a draggable WebGL jewel case.
-- **Crate Deck player** — a retro desktop-player that plays albums through YouTube's embedded player. 81 of 88 albums have a
-  video or playlist linked, most with backups the deck falls back to if one is removed or blocks embedding. For the
+- **Crate Deck player** — a retro desktop-player that plays albums through YouTube's embedded player. 80 of 88 albums have a
+  video or playlist linked (every link checked for embedding in Nov 2026), most with backups the deck falls back to if one is removed or blocks embedding. For the
   rest, paste any YouTube link into the deck and it is remembered in that browser.
 - **Four era themes** — '70s Shadhin, '80s Cassette, '90s Photocopy, '00s Underground, with accent colour, grain,
   motion and density controls. The theme can follow the album you open.

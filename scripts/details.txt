@@ -39,7 +39,7 @@ F: Cassette, CD
 L: Soundtek (cassette), Silver Disc (CD)
 P: Ahmed Saad (vocals, harmonica); Nasser Haque (keys); Schumann Zaman (bass); Rashed Iqbal (guitars); Aninda Kabir Avik (drums, percussion)
 T: Elomelo / Shomoyer Haate / Akasher Ki Rong? / Haway Ashe Bheshe / Kono Ek Bikele / Kokhono Ki Khujecho / Boishakhe / Keno Je She / Ondhokar Ghore / Jokhoni Akash / Ekbaar Bole Jao / Oboshor Bhalobasha
-Y: 0hhOtYC0u_8, GiT5Gz_sTVo
+Y: 0hhOtYC0u_8
 == Jibon Dhara
 F: Cassette, CD
 L: Soundtek
@@ -75,10 +75,10 @@ T: Kolpona / Amar Protichobi / Amar Klanti / Probash Theke / Nirbodh / Guti-2 / 
 Y: 3suHaaRj4GA
 == Shopnogulo Tomar Moto
 T: Osthirota / Adhare / Amader Gaane / Rupoker Gaan / Onneshon / Shopnogulo Tomar Moto / Hishebe Bhul Chilo / Kannar Rong / Aalor Michile / Ei Poth / Hotash Hridoy / Funkedelic Fried Rice
-Y: DDu1Qi0Y-dI, ZBXKmySi52c
+Y: ZBXKmySi52c
 == Charpotro
 T: Attohonon (Aurthohin) / Shukh Ei Gaane (Duray) / Proshno (Metal Maze) / Odekha Shorgo (Artcell) / Cholo Bangladesh (Cryptic Fate) / Jibon Mane (Canopy) / Canopy (Faith) / Chena Dukkho (Black) / Adhar (Srishti) / Bondi (Koprophillia) / Station (Agontuk) / Eka (Anything but Six)
-Y: jvh90gzqGbQ, diVXB01Jfx8
+Y: jvh90gzqGbQ
 == Onnoshomoy
 F: CD, cassette, paperback
 L: G-Series
@@ -88,12 +88,12 @@ T: Onno Shomoy / Bhul Jonmo / Poth Chola / Rupok (Ekti Gaan) / Mukhosh / Rahur G
 Y: ZZvKjEV0N6k, PLdpzrt8e8cdNu-J3YgN-xLxa0ZWFAVryb, 9w_ilyHtvFE
 == Amar Prithibi
 T: Amra / Obhiman / Amar Prithibi / Kobor / Bikhkhoto / Prarthona / Ekhono / Kothay? / Manush / Ondhokarer Pashey / Mittha / Dukkher Rong
-Y: it-KeKjbSdc, c8i1Qpcnsa8
+Y: it-KeKjbSdc
 == Notun Diner Michile
 F: CD, paperback
 P: Imtiaz (guest vocals)
 T: Notun Diner Michile / Hoytoba / Krishnochura / Jante Icche Korey / Tin Deyal / Tomader Gaan / Bhranto Ami / Shaat Din
-Y: PjJYUUIjXHA, eGS8Jn9SMJ0, 6P34WRd3MpI
+Y: 6P34WRd3MpI
 == Sreshtho
 F: CD
 P: Shakib (vocals, bass); Wahed (guitars); Sarfaraz (guitars); Farshed (drums)
@@ -109,12 +109,12 @@ T: Ghaate Lagaiya Dinga / Krishno Pokkho / Kalarey / Tomar Ghore / Shohoj Manush
 Y: G9hRttIwIB0, MWPQ3_cEi4I, iBPuhspk8c8
 == Onushilon
 T: Shurjo (Aurthohin) / Shukh Pakhir Nagal (Duray) / Bidhata (Faith) / Dukkho Bilash (Artcell) / Bhalobashar Rong (Metal Maze) / Smriti (Black) / Shokal Choyta (Cryptic Fate) / Dhikkar (Duray) / Obinosshor (Black) / Opshori (Artcell) / Natai Chera (Faith) / Bishwasher Alo (Metal Maze) / Eito Cholchey (Cryptic Fate)
-Y: 8oB-jHEaDOc, pl-bOGC7pwM
+Y: 8oB-jHEaDOc
 == Utshober Por
 F: CD
 P: Tahsan (vocals); Miraz (bass)
 T: ? / O / Porahoto / Iccha / Onukkhon / Utshober Por / Opomito / Eki Rokom / Ei Chayapothe / Ruddhobodh / Sloak / 6th September / Michimichi / Prakritik / Eka / Bimurto
-Y: xJIRlnmeoOs, XAVcWaW2hig
+Y: xJIRlnmeoOs
 == Dhrubok
 F: Interactive CD
 P: Sumon (vocals, bass); Piklu; Shubho; Shishir (of dNA); Rafa (of Severe Dementia)
@@ -126,13 +126,13 @@ L: Ektaar Music
 P: Balam (guitars, vocals); Kamal (guitars); Sazzad (guitars); Shams (keyboards); Cezanne (bass); Tipu (drums, percussion)
 C: Main artwork: Prince and Shams; Photography: Monty
 T: Bangalira Ar Koto Dekhbe / Boshonto / Hariye Tomake / Herecho / Shopno Tumi Nou / Moharaaj / Otit (Mone Pore Kromosho) / Shesh Prohor / Shukh / Cyclone
-Y: VDV1f6TLSKk, ueJGf9unTJo, TOIFv2OPl4o
+Y: ueJGf9unTJo
 == Ohom
 F: CD
 L: G-Series
 P: Shakib; Imran; Farhan; Arafat Kazi
 T: Akash / Chaya / Rong / Amar Notun Ami / Ohom / Oshanti 1 - Shongket / Oshanti 2 - Jhor / Oshanti 3 - Prachir / Shanti / ...Shorey Daray, Shesh Barer Moto
-Y: e5NZxwCWSGY, a5Mz7EbKy3Y
+Y: e5NZxwCWSGY
 == Kranti
 P: Fuad-Al-Muqtadir (composer); Anila Naz Chowdhury; Shihab Mahboob Morshed; Richard Dipon Modhu
 T: Intro / Shohobash / Shotto Prolap / Ke? / Amra Kromosho / Brishti Kobor Bhejay / Manoshik Protishod [Kedona] / Nobina / Jonmo / Pran Protima / Ghori
@@ -140,7 +140,7 @@ Y: DZHrdbrz-Ro, IbYOfUQHRtE
 == Agontuk
 C: Compiled by Sumon (Bassbaba)
 T: A.O.D. (Aurthohin) / Palestine (Jewel) / Opolap (Black) / Chol Chol Chol (Dew Drops) / Bondhu (Triloy) / Ochena (Koprophillia) / Ditiyo Prohor (Kronic) / Artonad (Poizon Green) / Biday (Cryptic Fate) / Ostitter Dikey Pododdhonir Shommohon (Artcell) / Dure Dure (ViBE) / Beshe Chola (Duray)
-Y: q7f2qMvS53g, pT2V1bocRgo, i65Oz62jI2Q
+Y: pT2V1bocRgo
 == Projonmo
 C: Concept: Azam Khan
 T: Projonmo (Azam Khan) / Otit (Aurthohin) / Dhushor Chaya (Duray) / Shopner Chorus (Artcell) / Odhikar (Cryptic Fate) / Blues & Roud (Black) / Jhumka (Subconscious) / Raat Nemeche (Metal Maze) / Ondher Chokhe (Raja) / Ekshoti Chithi (Shomoy) / Protikkha (Srishti) / Opurbo (Anything but Six)
@@ -148,20 +148,20 @@ T: Projonmo (Azam Khan) / Otit (Aurthohin) / Dhushor Chaya (Duray) / Shopner Cho
 L: Rabbit Communications; re-released by G-Series (2005)
 P: Ziaur Rahman Zia (bass); Tanzir Tuhin (vocals); Tushar (guitar); Jewel (guitar); Farhan (sarod); Shafin (drums)
 T: Nodi / Hashimukh / Shohorer Kotha / Shubhro Rongin (A Tribute to Jim Morrison) / Hoyna / Lal Nil Golpo / Nishchup Adhar / Shunno / Ghum / Jahaji / Obak Bhromon (Instrumental)
-Y: PLlvmXFBeUqGV7sljsUr0uz5muk3UczaPq, iv39CMHGMWE
+Y: PLlvmXFBeUqGV7sljsUr0uz5muk3UczaPq
 == Elephant Road
 F: CD
 L: NineVoltStudio (USA), G-Series (Bangladesh)
 P: Imran Hussain (guitar, vocals); Mashuk Rahman (guitar, vocals); Syed Ahmed Tushar (vocals, tabla); Collin Mueller (bass)
 C: Producer: Joy Islam; Sound engineers: Collin Mueller, Joy Islam
 T: Mohanogori / Porajoy / Gol Prthibi / Dirghoshash / Boiragi / Jagoron / Bhallagche / Shadhinota / Chiley Kotha
-Y: _44aqspak3Y, tI8VlK4vfJg
+Y: _44aqspak3Y
 == Agontuk 2
 T: Juddho (Aurthohin) / Chile Kothar Shepai (Artcell) / Obocheton (Nemesis) / Kritodash (ReBORN) / Odrissho Juddho (Stentorian) / Prem (Cryptic Fate) / Artonad (Arbovirus) / Shada (Breach) / Shesh (Kral) / Nishash (Dethrow) / Shopno (dNA) / Shokarto Upokul (Black) / Arrival [Instrumental] (Kamal of Warfaze)
-Y: EeeObmCWLKA, Gk32f8ZEqso, Ca0CEsdE3tE
+Y: EeeObmCWLKA
 == Lokayot
 T: Boyosh (Aurthohin) / Shotto (Black) / Chera Akash (Artcell) / Gontobbo (Cryptic Fate) / Shopnadisto (Arbovirus) / Ohongkar (Icons) / Maya (Aashor) / Agrashon (ReBORN) / Ghash (Fulbanu's Revenge) / Protifolon (dNA) / Deyal Bhenge (Scarecrow) / Shopnolok (X-Uranium) / Neelkaal (Stentorian) / Bhobisshot (Bivishika) / Artochitkar (Striking) / Opekkhay (Kral)
-Y: LDusZrtv5Og, 3UYGOGD4MJk, pVh7mf2HTNk
+Y: PlG2nipIYK4
 == Din Bodol
 T: Ashirbaad (ABC: Artcell, Black, Cryptic Fate) / Osthir Shomoy (Metal Maze) / Shunno (Aashor) / Obhishap (Arbovirus) / Tarpor (Fulbanu's Revenge) / Dusshopno (Nemesis) / Boshonto (Breach) / Bhoy (Stentorian) / Nishpaap Oporadh (Icons) / Ekhanei Mrittu (Poizon Green) / Shobkichu (ReBORN) / Nishiddho Shonglap (Striking) / Mohakaal (Bivishika) / Tritiyo Bishwa (Music Zoo) / Dure Kothao (Scarecrow) / Obosheshey (Vinyl N' Sugar) / Asroy (Moshpit) / Jokhon (Helldivers) / Tarporeo Bangladesh (Bloodoria)
 Y: NgC_E8fK34I, 8qgNwWsYd54
@@ -180,20 +180,20 @@ L: G-Series
 P: Shibu (vocals); Sumon (vocals); Ujjal (vocals); Shoeb (guitars); Shourov (flute, percussion); Kibria (bass); Joy (drums)
 C: Guests: Runi (dotara), Goutom (tabla), Nuru Khan (esraj), Asad (keyboard)
 T: Chena Ochena / Chhelebela / Shohor / Akash Meghe Dhaka / Crusade / Choturdike / Jano Ki? / Byabochchhed / Kobial / Megh / Om
-Y: y7NQEgH65uE, 4r40FSSy71E
+Y: y7NQEgH65uE
 == RaaGa
 F: Cassette, CD, paperback
 L: G-Series
 P: Elita (vocals); Chisti (guitars); Joy (bass); Ashiq (keys, synths, turntables); Emran (keys, programming); Nafeez (drums, percussion)
 C: Co-producers: Ashiq and Balam; Recording and mixing: Balam, Habib; Sleeve design: almostpink
 T: Brishti / Kothay / Asha / Jorota / Smriti / Neel Akash / Aalo / Ekhono / Ahoban / Poth
-Y: 9ioiWfopnN8, 27E2-6zEOso
+Y: 3v7NwrBK_eg, p1BpeuKe5Vs
 == Shunno
 L: G-Series
 P: Apu (keys, vocals); Rana (guitars, vocals); Ishtyakk (guitars); Emil (vocals)
 C: Guests: Nandito (bass), Ratul (drums), Rafa and Elita (vocals), Iqbal Asif Jewel (backing vocals)
 T: Anmone / Koishore / Nirobe / Jodi / Shomadhi / Kobita / Abaro... / Adhare / Shopnomrittu / Bangladesh
-Y: ZwfCv0de-iM, BXzzReicwsc
+Y: BXzzReicwsc
 == Megher Deshe (A Tribute to John Denver)
 P: Sumon; Nazia and Elita (vocals)
 T: Tomar Jonno (Annie's Song) / Nil Akasher Pothe (Leaving On a Jetplane) / Methopoth (Take Me Home, Country Road) / Shopner Desher (Dreamland Express) / Kobita, Prarthona O Protigga (Poems, Prayers & Promises) / Amar Bagan (Garden Song) / Ei Guitar (The Old Guitar) / Bohudure (Fly Away) / Hoytoba Bhalobasha (Perhaps Love) / Tomar Jonno (J-Mix)
@@ -211,7 +211,7 @@ T: Nishiddho Nogori / Ochena Onubhuti / Obhishopto / Proshno / Shesh Patay (Shes
 F: CD
 L: G-Series
 T: Brishtihoto / Shottoy / Oporanho / Neo / Ishshoronio / [O]shompurno / Utshorgo / Oshomo / Sporsho / Mrito / Snato / Obinoy [Bonus Track]
-Y: rVSa0ilaC30, wPUsMk2mRkw, Wv9JPlSyS5Q
+Y: rVSa0ilaC30
 == Agontuk 3
 C: Compiled by Sumon
 T: Itihash (Aurthohin) / Bangladesh... Smriti O Amra (Artcell) / Shades of White & Black (Black) / Onadorer Shontan (Cryptic Fate) / Desh (Zefyr) / Obinoy (Icons) / Bimurh Monushotter Udbhashon (Dripping Gore) / Mrittu (Jonmer Purbey) (666) / Dhuwar Majhey (Shade) / Mukhosh Khule (Fulbanu's Revenge) / Mohasrishtir Gaan (Aashor) / Moho (Echoes) / Oparey (Bivishika) / Tobuo (Nagorik) / Bishonno Adhar (Stentorian feat. Bassbaba)
@@ -268,7 +268,7 @@ L: G-Series
 P: Rashed Uddin Ahmed Topu (vocals, lyrics); Emran Khan (keys, programming)
 C: Mixing and mastering: Buno; Drums: Tony Vincent Gomes; Guest vocals: Armeen Musa, Elita Karim, Simin Saifuddin
 T: Ke Daake / Ei Ki Beshi Na / Jatri / Miththey Prem / Amra Shopne Bachi / Bhalobasha Shunechi Ja / Ojana Mone / Ektu Pore / Pari Na / Jitso
-Y: UWN7VGZWGkk, _XEdH0QuMfo, Zb0hkZOzc2Q
+Y: UWN7VGZWGkk, _XEdH0QuMfo
 == Light Years Ahead
 F: CD, cassette, paperback
 L: G-Series
@@ -296,11 +296,11 @@ T: Baeg / Anonto / Shopno / Ebarer Cholon / Dhongsho / Jantrik Shobbhota / Tobuo
 F: Paperback
 C: Co-ordinator: Kamal (Guitarman)
 T: Protirup (Aurthohin) / Utshober Utshahe (Artcell) / 35 (Black) / Jani Na (The Watson Brothers) / Keno Manush (ReBORN) / Jonmechi Taai (Yaatri) / Ek Janala Akasher Manchitro (Kral) / Chinno Ghuri (Koprophillia) / Attohonon (Hell Divers) / Proloy (Zeal) / Dushshopno (Sentinals) / Morichika (Rulz) / Debi (Kolpolok) / Shohomoron (Carsinoma) / Durboddho Monushotto (Powersurge) / Shomoyer Epare (Kalponik) / Hourglass (Moshpit)
-Y: xqqMB6F_VyI, ikoiZOPXVYY
+Y: KSXwM19oamM, vOAw9tVu3kE
 == 64m 53s
 F: CD
 T: Shikarokti / Uttaradhikar / Ja Icche Tai / Mukut Chara Raja / Adhar O Ishshor / Prithibir Shesh Prante / Omanush / Amader Gaan / Chayamanush / Corporate Anthem / Shekor / Shorger Shishura
-Y: K0qrtJyZQVg, lyiLXeNw-fU, J6u3mmCEBr8
+Y: K0qrtJyZQVg, lyiLXeNw-fU
 == Kolponar Baire
 F: Paperback, cassette
 L: G-Series
@@ -320,13 +320,13 @@ T: Gaanwala / Ghum Ashena / Obhiman / Porajoy / Jhor / Ke / Amar Golpo / Ghumpar
 Y: g4rZBwDgwBI
 == Chena Jogot
 T: Shopnodev / Shesher Opashe / Bidhatari Ronge Aka / Chena Jogot / Odhora / Mone Pore / Ashar Prodip Jole / Ure Chole Jai / Amar Shongbidhan / Obak Shob Shopno / Nostalia
-Y: XWNb73vn3u0
+Y: X5rLLqFODMA, 21HhEq-kWt8, tPCluiv7yiA
 == Neon Aloy Shagotom
 F: Paperback
 L: G-Series
 C: Coordinator: Ziaur Rahman Zia; Cover photograph: Foring; Mastering: Zooel
 T: Mataal (Karnishey Magpie) / Nefartiti (Meghdol) / Shondhan Chai (Striking) / Shadakalo (D Minor) / Asader Khola Chithi (Shohortoli) / Ar Koto? (Ajob) / Wandering with Clouds [Instrumental] (Dhrubo) / Raat O Rajpother Adda (Road House) / Kuasha (Shorboda) / Prolap (B'Borton) / Ektu Boshia Thako (Kanak O Kartik) / Projonmer Shongram (Shohor) / Muthophone (Shironamhin)
-Y: BebM_zxBuao, clNho28gV74, msnGhpsJ86U
+Y: BebM_zxBuao, msnGhpsJ86U
 == Jhalmuri 1 & 2
 F: CD
 L: Bengal Music Company (BMC)
@@ -334,7 +334,6 @@ C: Arrangements: Shayan Chowdhury Arnob
 T: Rakhbo Kake (Punam) / Shopno Pabo (Tahmid) / Projapoti (Abida) / Shukh Pakhi (Gourob) / Dur Theke (Armeen & Nabila) / Kobe Jaabo (Shawjeeb) / Ekta Chhele (Sahana) / Shopno Bariye (Bappa) / O Ami (Sovvota) / Britter Baire (Shuvo) / Opekkha (Laura) / Kotodur (Rupom) / Ghumiye Thakai Bhalo (Srabonti) / Cellphone Amar Cellphone (Syed Wakil Ahmed) / Hridoyer Dor (Habib feat. Nancy) / Chad Dekhe Keu (Arnob)
 == Underground 2
 T: Nirbodh (Aurthohin) / Joydhoni (Nemesis) / Odbhut Pran (ViBE) / Chetona (Yaatri) / Chhuti (Koprophillia) / Opomrittu (Stentorian) / Klanto Bohumatrikota (Kral) / Prachir (Metal Maze) / Ditiyo Prohor (Tomosh) / Ahoban (Eclipse) / Mon Harano (Re-Dhun) / Dhumketu (Bishourgo) / Ashor (Aloukik) / Du Anon (Satanic) / Joddha (Mechanix)
-Y: e21-ieyj39I, -wje6x_9Hf8
 == Live Now
 F: CD
 T: Ei Bidaye (Artcell) / Dhushor Bhabona (Nemesis) / Hollow (Attohonon-2) (Aurthohin) / Krititto (Cryptic Fate) / Smritir Arale (Birodh) / Ei Ami (Black) / Amar Shotto (X-Factor) / Shukhi (The Watson Brothers) / Chondro Grontho (Koprophillia) / Batighor (ReBORN) / Amar Shomadhi (dNA) / Shurjo Shontan (Arbovirus) / Anondo (Kolpolok) / Arti ('71) / Live Now (Various Artists)
@@ -358,7 +357,7 @@ L: Bengal Music Company (BMC)
 P: Shayan Chowdhury Arnob; Saad and MAK (guitar); Andrew (saxophone); Zohad (backing vocals); Idris Rahman (flute)
 C: Lyrics: Sahana Bajpaie, Rajib Ashraf, Anisul Haque and others
 T: Onek Dur / Shopno Debe Doob / Adhkhana / Ghor Bahir / Lukiye / Dhaka Raate / Akash Kaalo / Dikbidik / Tati / Chai / Ghum / Rastay / Dhushor Megh / Noyon Tomare
-Y: v5ZKLPQDWhU, RGwBjlyUGIc
+Y: RGwBjlyUGIc
 == Oprostut Juddho
 F: Paperback
 L: G-Series
@@ -383,13 +382,13 @@ L: G-Series
 P: Zia (bass); Tuhin (vocals); Shafin (drums); Tushar (guitar, keys, banjo); Rajib (keyboards)
 C: Guests include Rahul Anondo (silver flute), Andrew Morris (saxophone), Farhan (sarod)
 T: Bondho Janala / Bhalobasha Megh / Bullet Kingba Kobitay / Shurjo / Eka / Shohosha Deep / Bus Stoppage / Shuprobhath / Porichoy / Bangladesh
-Y: PLlvmXFBeUqGUvAn8j0c1gkp7blqdw-1Mf, JirEG9LIJTU, OoMJ55MIC0E
+Y: PLlvmXFBeUqGUvAn8j0c1gkp7blqdw-1Mf, JirEG9LIJTU
 == Shohorbondi
 L: Agniveena
 P: Shibu (vocals); Sumon (vocals, guitar); Shoaib (guitars, keys); Kibria (bass); Amzad (drums); Sourov (flute)
 C: Grand piano: Saad Hussein
 T: Muthophone / Thik Thak / Roder Fota / Kumari / Shohorbondi / Char Char Chouko / Pathure Debi / Rongin Feresta / Dur Prithibi / Abar Shohor / Nirban
-Y: LK-qDX7dEPw, PVFlBMvkwYY, dhFWcgaiDm8
+Y: LK-qDX7dEPw, dhFWcgaiDm8
 == Arnob & Friends Live
 F: CD
 L: Bengal Music Company (BMC)
@@ -439,7 +438,7 @@ F: Paperback CD
 L: Deadline Music
 P: Mizan (vocals); Kamal (guitars); Oni (guitars); Shams (keyboards); Roger (bass); Tipu (drums, percussion)
 T: Agami / Na / Rupkotha / Purnota / Jedin / Shotto / Projonmo 2012 / Jonosrot / Protikkha / Banglalink Tune
-Y: r7wbm6D3Js8
+Y: KmDLj7i06KY, 2SSNIJ-vf-0
 == Adheko Ghume
 L: Bengal Music Company (BMC)
 C: Piano: Elvind Lodemel; Vocals: Elma, Srabonti Ali, Warda; Tabla and khol: Swarup Hossain; Artwork: Arnob and Elma

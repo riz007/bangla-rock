@@ -22,7 +22,9 @@ export function liveCovers(): Promise<Record<string, string>> {
       const byPost = new Map<string, string>()
       for (const e of data.feed?.entry ?? []) {
         const href = e.link?.find(l => l.rel === 'alternate')?.href
-        const img = e.content?.$t.match(/<img[^>]+src="([^"]+)"/i)?.[1] ?? e.media$thumbnail?.url
+        // the first image is usually the front cover; skip a leading screenshot (e.g. Dhrubok's autorun) if a cover follows
+        const imgs = [...(e.content?.$t ?? '').matchAll(/<img[^>]+src="([^"]+)"/gi)].map(m => m[1])
+        const img = imgs.find(u => /artwork|arwork|front|folder|cover/i.test(decodeURIComponent(u.split('/').pop() ?? ''))) ?? imgs[0] ?? e.media$thumbnail?.url
         if (href && img) byPost.set(norm(href), img.replace(/^http:/, 'https:'))
       }
       const map: Record<string, string> = {}
