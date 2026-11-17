@@ -6,8 +6,24 @@ import {
   useMemo,
   useState,
 } from "react";
+import { Button } from "@ui-sdk/react/button";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@ui-sdk/react/dialog";
+import { Field, FieldLabel } from "@ui-sdk/react/field";
+import { Input } from "@ui-sdk/react/input";
+import {
+  SegmentedControl,
+  SegmentedControlIndicator,
+  SegmentedControlItem,
+} from "@ui-sdk/react/segmented-control";
+import { Switch, SwitchThumb } from "@ui-sdk/react/switch";
+import { Toggle, ToggleGroup } from "@ui-sdk/react/toggle";
 import { Cover } from "./components/Cover";
-import { Player } from "./components/Player";
 import {
   ALBUMS,
   ARTISTS,
@@ -29,9 +45,13 @@ import {
   savePrefs,
   themeFor,
   type Prefs,
+  type ThemeId,
 } from "./theme";
 
 const CaseViewer = lazy(() => import("./components/CaseViewer"));
+const Player = lazy(() =>
+  import("./components/Player").then((m) => ({ default: m.Player })),
+);
 
 const byId = new Map(ALBUMS.map((a) => [a.id, a]));
 const yt = (a: Album) =>
@@ -140,11 +160,11 @@ export default function App() {
   }, []);
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if (e.key === "Escape") panel ? setPanel(null) : go(null);
+      if (e.key === "Escape" && panel && !open) setPanel(null);
     };
     addEventListener("keydown", on);
     return () => removeEventListener("keydown", on);
-  }, [go, panel]);
+  }, [panel, open]);
 
   const list = useMemo(() => {
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -192,28 +212,28 @@ export default function App() {
             <em lang="bn">বাংলা রক ক্রেট · ১৯৯০–২০১৩</em>
           </span>
         </a>
-        <label className="search">
-          <span className="sr">Search albums, bands or years</span>
-          <input
+        <Field className="search">
+          <FieldLabel className="sr">Search albums, bands or years</FieldLabel>
+          <Input
             type="search"
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onValueChange={setQ}
             placeholder="Search — Warfaze, 2006, Agontuk, অর্থহীন…"
           />
-        </label>
+        </Field>
         <div className="actions">
-          <button
-            onClick={() => setPanel(panel === "tape" ? null : "tape")}
-            aria-expanded={panel === "tape"}
+          <Toggle
+            pressed={panel === "tape"}
+            onPressedChange={(on) => setPanel(on ? "tape" : null)}
           >
             Mixtape <b>{tape.length}</b>
-          </button>
-          <button
-            onClick={() => setPanel(panel === "theme" ? null : "theme")}
-            aria-expanded={panel === "theme"}
+          </Toggle>
+          <Toggle
+            pressed={panel === "theme"}
+            onPressedChange={(on) => setPanel(on ? "theme" : null)}
           >
             Theme · {THEMES.find((t) => t.id === theme)!.era}
-          </button>
+          </Toggle>
         </div>
       </header>
 
@@ -238,17 +258,19 @@ export default function App() {
       </section>
 
       <nav className="filters" aria-label="Filter the crate">
-        <div className="timeline">
-          <button className={!era ? "on" : ""} onClick={() => setEra(null)}>
-            All years<small>{ALBUMS.length}</small>
-          </button>
+        <SegmentedControl
+          className="timeline"
+          aria-label="Era"
+          value={era ?? "all"}
+          onValueChange={(v) => setEra(!v || v === "all" ? null : v)}
+        >
+          <SegmentedControlIndicator />
+          <SegmentedControlItem value="all">
+            All years <small>{ALBUMS.length}</small>
+          </SegmentedControlItem>
           {ERAS.map((e) => (
-            <button
-              key={e.id}
-              className={era === e.id ? "on" : ""}
-              onClick={() => setEra(era === e.id ? null : e.id)}
-            >
-              {e.name}
+            <SegmentedControlItem key={e.id} value={e.id}>
+              {e.name}{" "}
               <small>
                 {e.tag} ·{" "}
                 {
@@ -256,21 +278,22 @@ export default function App() {
                     .length
                 }
               </small>
-            </button>
+            </SegmentedControlItem>
           ))}
-        </div>
-        <div className="chips">
+        </SegmentedControl>
+        <ToggleGroup
+          className="chips"
+          aria-label="Genre"
+          value={genre ? [genre] : []}
+          onValueChange={(v) => setGenre((v[0] as Genre) ?? null)}
+        >
           {(Object.keys(GENRES) as Genre[]).map((g) => (
-            <button
-              key={g}
-              className={genre === g ? "on" : ""}
-              onClick={() => setGenre(genre === g ? null : g)}
-            >
+            <Toggle key={g} value={g}>
               {GENRES[g]}{" "}
               <small>{ALBUMS.filter((a) => a.genre === g).length}</small>
-            </button>
+            </Toggle>
           ))}
-        </div>
+        </ToggleGroup>
       </nav>
 
       <main className={`crate${prefs.dense ? " dense" : ""}`}>
@@ -301,7 +324,7 @@ export default function App() {
         {!list.length && (
           <p className="empty">
             Nothing in the crate for that.{" "}
-            <button onClick={() => search("")}>Clear filters</button>
+            <Button onClick={() => search("")}>Clear filters</Button>
           </p>
         )}
       </main>
@@ -317,24 +340,20 @@ export default function App() {
         artwork belong to the artists and labels.
       </footer>
 
-      {open && (
-        <div
-          className="sheet-wrap"
-          onClick={(e) => e.target === e.currentTarget && go(null)}
-        >
-          <article
-            className="sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${open.title} by ${open.artist}`}
-          >
-            <button
-              className="close"
-              onClick={() => go(null)}
-              aria-label="Close"
-            >
-              ×
-            </button>
+      <Dialog
+        open={!!open}
+        onOpenChange={(o) => !o && go(null)}
+        persistentElements={[".amp-host"]}
+        onOpenChangeComplete={(o) =>
+          dispatchEvent(new Event(o ? "amp:raise" : "amp:lower"))
+        }
+      >
+        <DialogBackdrop className="sheet-wrap" />
+        {open && (
+          <DialogContent className="sheet">
+            <DialogClose className="close" aria-label="Close album">
+              <span aria-hidden="true">×</span>
+            </DialogClose>
             <Suspense
               fallback={
                 <div className="viewer">
@@ -359,14 +378,14 @@ export default function App() {
               <p className="kicker">
                 {GENRES[open.genre]} · {open.year}
               </p>
-              <h2>{open.title}</h2>
+              <DialogTitle>{open.title}</DialogTitle>
               <p className="artist">
                 {open.artist === "Various Artists" ? (
                   open.artist
                 ) : (
-                  <button className="link" onClick={() => search(open.artist)}>
+                  <Button className="link" onClick={() => search(open.artist)}>
                     {open.artist}
-                  </button>
+                  </Button>
                 )}
                 {ARTISTS[open.artist]?.bn && (
                   <em lang="bn"> {ARTISTS[open.artist].bn}</em>
@@ -378,21 +397,21 @@ export default function App() {
                   <h3>{open.genre === "mix" ? "On this disc" : "With"}</h3>
                   <div className="chips small">
                     {open.with.map((w) => (
-                      <button
+                      <Button
                         key={w}
                         onClick={() => search(w)}
                         title={ARTISTS[w]?.note}
                       >
                         {w}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </>
               )}
               <div className="cta">
-                <button className="btn primary" onClick={() => playAlbum(open)}>
-                  ▶ Play on the deck
-                </button>
+                <Button className="btn primary" onClick={() => playAlbum(open)}>
+                  <span aria-hidden="true">▶ </span>Put it on the deck
+                </Button>
                 <a
                   className="btn"
                   href={yt(open)}
@@ -409,15 +428,16 @@ export default function App() {
                 >
                   Spotify
                 </a>
-                <button
+                <Toggle
                   className="btn"
-                  onClick={() => toggleTape(open.id)}
-                  aria-pressed={tape.includes(open.id)}
+                  pressed={tape.includes(open.id)}
+                  onPressedChange={() => toggleTape(open.id)}
                 >
-                  {tape.includes(open.id)
-                    ? "✓ On your mixtape"
-                    : "+ Add to mixtape"}
-                </button>
+                  <span aria-hidden="true">
+                    {tape.includes(open.id) ? "✓ " : "+ "}
+                  </span>
+                  On my mixtape
+                </Toggle>
               </div>
               {info && (
                 <dl className="facts">
@@ -466,26 +486,30 @@ export default function App() {
                 All scans, inlay and full notes on Bangla CD Covers ↗
               </a>
             </div>
-          </article>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
 
       {panel === "theme" && (
         <aside className="panel" aria-label="Customise theme">
           <h2>Set the room</h2>
-          <div className="themes">
+          <SegmentedControl
+            className="themes"
+            aria-label="Room"
+            orientation="vertical"
+            value={prefs.theme}
+            onValueChange={(v) =>
+              v && set({ theme: v as ThemeId, accent: null })
+            }
+          >
+            <SegmentedControlIndicator />
             {THEMES.map((t) => (
-              <button
-                key={t.id}
-                data-swatch={t.id}
-                className={prefs.theme === t.id ? "on" : ""}
-                onClick={() => set({ theme: t.id, accent: null })}
-              >
+              <SegmentedControlItem key={t.id} value={t.id} data-swatch={t.id}>
                 <b>{t.era}</b> {t.name}
                 <small>{t.blurb}</small>
-              </button>
+              </SegmentedControlItem>
             ))}
-          </div>
+          </SegmentedControl>
           <label className="row">
             Accent colour
             <span>
@@ -495,9 +519,9 @@ export default function App() {
                 onChange={(e) => set({ accent: e.target.value })}
               />
               {prefs.accent && (
-                <button className="link" onClick={() => set({ accent: null })}>
-                  reset
-                </button>
+                <Button className="link" onClick={() => set({ accent: null })}>
+                  Reset accent
+                </Button>
               )}
             </span>
           </label>
@@ -510,14 +534,15 @@ export default function App() {
               ["dense", "Compact crate"],
             ] as const
           ).map(([k, label]) => (
-            <label key={k} className="row">
-              {label}
-              <input
-                type="checkbox"
+            <Field key={k} className="row">
+              <FieldLabel>{label}</FieldLabel>
+              <Switch
                 checked={prefs[k]}
-                onChange={(e) => set({ [k]: e.target.checked })}
-              />
-            </label>
+                onCheckedChange={(on) => set({ [k]: on })}
+              >
+                <SwitchThumb />
+              </Switch>
+            </Field>
           ))}
         </aside>
       )}
@@ -550,18 +575,18 @@ export default function App() {
                       {a.artist} · {a.year}
                     </span>
                   </a>
-                  <button
+                  <Button
                     onClick={() => playAlbum(a)}
-                    aria-label={`Play ${a.title}`}
+                    aria-label={`Cue ${a.title}`}
                   >
-                    ▶
-                  </button>
-                  <button
+                    <span aria-hidden="true">▶</span>
+                  </Button>
+                  <Button
                     onClick={() => toggleTape(id)}
                     aria-label={`Remove ${a.title}`}
                   >
-                    ×
-                  </button>
+                    <span aria-hidden="true">×</span>
+                  </Button>
                 </li>
               );
             })}
@@ -569,30 +594,38 @@ export default function App() {
         </aside>
       )}
 
-      {spinning && (
-        <Player
-          album={spinning}
-          sources={sourceOf(spinning)}
-          note={
-            links[spinning.id] ? "your own link" : details[spinning.id]?.ytNote
-          }
-          tracks={details[spinning.id]?.tracks}
-          real={prefs.real}
-          liveCover={live[spinning.id]}
-          playToken={playToken}
-          searchUrl={yt(spinning)}
-          onStep={step}
-          onClose={() => setSpinId(null)}
-          onLink={(id) =>
-            setLinks((l) => {
-              const n = { ...l };
-              if (id) n[spinning.id] = id;
-              else delete n[spinning.id];
-              return n;
-            })
-          }
-        />
-      )}
+      <div className="amp-host">
+        {spinning && (
+          <Suspense fallback={null}>
+            <Player
+              album={spinning}
+              sources={sourceOf(spinning)}
+              note={
+                links[spinning.id]
+                  ? "your own link"
+                  : details[spinning.id]?.ytNote
+              }
+              tracks={details[spinning.id]?.tracks}
+              real={prefs.real}
+              liveCover={live[spinning.id]}
+              playToken={playToken}
+              searchUrl={yt(spinning)}
+              skin={prefs.skin}
+              onSkin={(skin) => set({ skin })}
+              onStep={step}
+              onClose={() => setSpinId(null)}
+              onLink={(id) =>
+                setLinks((l) => {
+                  const n = { ...l };
+                  if (id) n[spinning.id] = id;
+                  else delete n[spinning.id];
+                  return n;
+                })
+              }
+            />
+          </Suspense>
+        )}
+      </div>
     </>
   );
 }

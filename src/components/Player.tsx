@@ -1,7 +1,24 @@
-// A retro desktop-player style deck. Audio comes from YouTube's own embedded
-// player (IFrame API) — nothing is downloaded or re-hosted. The video stays
-// visible while playing, as YouTube's terms require.
+// Audio comes from YouTube's own embedded player (IFrame API): nothing is
+// downloaded or re-hosted, and the video stays visible while it plays, as
+// YouTube's terms require. Two faces share one engine: a cassette deck and a
+// late-90s desktop player.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@ui-sdk/react/button";
+import { Field, FieldLabel } from "@ui-sdk/react/field";
+import { Input } from "@ui-sdk/react/input";
+import {
+  SegmentedControl,
+  SegmentedControlIndicator,
+  SegmentedControlItem,
+} from "@ui-sdk/react/segmented-control";
+import {
+  Slider,
+  SliderControl,
+  SliderIndicator,
+  SliderThumb,
+  SliderTrack,
+} from "@ui-sdk/react/slider";
+import { Toggle } from "@ui-sdk/react/toggle";
 import type { Album } from "../data/albums";
 import { Cover } from "./Cover";
 
@@ -49,7 +66,36 @@ const isList = (id: string) => id.length > 11;
 const clock = (t: number) =>
   `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
 
+export type Skin = "tape" | "desktop";
+export const SKINS: { id: Skin; name: string }[] = [
+  { id: "tape", name: "Tape deck" },
+  { id: "desktop", name: "Desktop ’98" },
+];
+
 type Status = "idle" | "loading" | "playing" | "paused" | "error" | "blocked";
+type Wind = "rew" | "ff" | null;
+
+interface Deck {
+  status: Status;
+  label: string;
+  time: number;
+  dur: number;
+  vol: number;
+  source?: string;
+  wind: Wind;
+  play: () => void;
+  pause: () => void;
+  stop: () => void;
+  seek: (t: number) => void;
+  volume: (v: number) => void;
+  step: (d: number) => void;
+  eject: () => void;
+}
+
+const readVol = () => {
+  const v = Number(globalThis.localStorage?.getItem("bcc:vol"));
+  return Number.isFinite(v) && v > 0 && v <= 100 ? v : 80;
+};
 
 export function Player(props: {
   album: Album;
@@ -60,27 +106,58 @@ export function Player(props: {
   liveCover?: string;
   playToken: number;
   searchUrl: string;
+  skin: Skin;
+  onSkin: (s: Skin) => void;
   onStep: (d: number) => void;
   onClose: () => void;
   onLink: (id: string | null) => void;
 }) {
-  const { album, sources, tracks, playToken } = props;
+  const { album, sources, tracks, playToken, skin } = props;
   const sourcesKey = sources.join("|");
-  const [pick, setPick] = useState(0); // which candidate link is on the deck
+  const [pick, setPick] = useState(0);
   const [retry, setRetry] = useState(0);
   const source = sources[pick];
-  // YouTube reports removed / non-embeddable videos through onError: move on to the next candidate
+  // YouTube reports removed or non-embeddable videos through onError: try the next candidate
   const advance = useRef(() => {});
   const host = useRef<HTMLDivElement>(null);
   const yt = useRef<any>(null);
   const loadedSrc = useRef<string | undefined>(undefined);
   const [status, setStatus] = useState<Status>("idle");
-  const [mini, setMini] = useState(true); // opens as a slim bar; expands on play
+  const [mini, setMini] = useState(true);
   const [time, setTime] = useState(0);
   const [dur, setDur] = useState(0);
-  const [vol, setVol] = useState(80);
+  const [vol, setVol] = useState(readVol);
+  const volRef = useRef(vol);
   const [now, setNow] = useState("");
   const [link, setLink] = useState("");
+  const [swap, setSwap] = useState(false);
+  const [wind, setWind] = useState<Wind>(null);
+  const [list, setList] = useState(true);
+  const shell = useRef<HTMLElement>(null);
+
+  // The album sheet is a top-layer dialog: while it's open the player joins
+  // the top layer above it, and drops back to a plain fixed panel after.
+  useEffect(() => {
+    const el = shell.current;
+    if (!el?.showPopover) return;
+    const raise = () => {
+      if (el.matches(":popover-open")) el.hidePopover();
+      el.popover = "manual";
+      el.showPopover();
+    };
+    const lower = () => {
+      if (!el.popover) return;
+      el.hidePopover();
+      el.removeAttribute("popover");
+    };
+    if (document.querySelector(".sheet[data-open]")) raise();
+    addEventListener("amp:raise", raise);
+    addEventListener("amp:lower", lower);
+    return () => {
+      removeEventListener("amp:raise", raise);
+      removeEventListener("amp:lower", lower);
+    };
+  }, []);
 
   const play = useCallback(async () => {
     if (!source) return;
@@ -110,7 +187,7 @@ export function Player(props: {
         },
         events: {
           onReady: (e: any) => {
-            e.target.setVolume(vol);
+            e.target.setVolume(volRef.current);
             e.target.playVideo();
           },
           onStateChange: (e: any) => {
@@ -127,7 +204,7 @@ export function Player(props: {
     } catch {
       setStatus("blocked");
     }
-  }, [source, vol]);
+  }, [source]);
 
   advance.current = () => {
     if (pick + 1 < sources.length) {
@@ -145,7 +222,7 @@ export function Player(props: {
     setTime(0);
   }, []);
 
-  // a new album (or a newly linked source) stops whatever was on the deck
+  // a new album, or a newly linked source, stops whatever was on the deck
   useEffect(() => {
     if (loadedSrc.current) {
       yt.current?.stopVideo?.();
@@ -157,6 +234,7 @@ export function Player(props: {
     setDur(0);
     setNow("");
     setLink("");
+    setSwap(false);
   }, [album.id, sourcesKey]);
   useEffect(() => {
     if (playToken) {
@@ -176,72 +254,129 @@ export function Player(props: {
     }, 500);
     return () => clearInterval(t);
   }, [status]);
+  useEffect(() => {
+    if (!wind) return;
+    const t = setTimeout(() => setWind(null), 700);
+    return () => clearTimeout(t);
+  }, [wind]);
 
-  const label = {
-    idle: source ? "READY" : "NO TAPE",
-    loading: "CUEING",
-    playing: "PLAY",
-    paused: "PAUSE",
-    error: "ERROR",
-    blocked: "OFFLINE",
-  }[status];
+  const deck: Deck = {
+    status,
+    label: {
+      idle: source ? "READY" : "NO TAPE",
+      loading: "CUEING",
+      playing: "PLAY",
+      paused: "PAUSE",
+      error: "ERROR",
+      blocked: "OFFLINE",
+    }[status],
+    time,
+    dur,
+    vol,
+    source,
+    wind,
+    play: () => {
+      setMini(false);
+      void play();
+    },
+    pause: () => yt.current?.pauseVideo?.(),
+    stop,
+    seek: (t) => {
+      setTime(t);
+      yt.current?.seekTo?.(t, true);
+    },
+    volume: (v) => {
+      setVol(v);
+      volRef.current = v;
+      yt.current?.setVolume?.(v);
+      try {
+        localStorage.setItem("bcc:vol", String(v));
+      } catch {
+        /* private mode */
+      }
+    },
+    step: (d) => {
+      setWind(d < 0 ? "rew" : "ff");
+      props.onStep(d);
+    },
+    eject: () => {
+      stop();
+      setMini(false);
+      setSwap(true);
+    },
+  };
+
   const marquee = `${album.artist} — ${album.title} (${album.year})${now ? `  ···  ${now}` : ""}`;
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const id = parseYouTube(link);
-    if (id) props.onLink(id);
+    if (id) {
+      setSwap(false);
+      props.onLink(id);
+    }
   };
+  const askLink =
+    swap || (status === "error" && sources.length > 0) || !sources.length;
+  const art = (size: number) => (
+    <Cover album={album} size={size} real={props.real} live={props.liveCover} />
+  );
 
   return (
     <section
+      ref={shell}
       className={`amp${mini ? " mini" : ""}`}
+      data-skin={skin}
       data-status={status}
       aria-label="Player"
     >
       <header className="amp-bar">
-        <span>CRATE DECK</span>
-        <button
+        <span className="amp-title">
+          {skin === "tape" ? "BRC-90 STEREO" : "CRATE AMP"}
+        </span>
+        <SegmentedControl
+          className="amp-skins"
+          aria-label="Player skin"
+          value={skin}
+          onValueChange={(v) => v && props.onSkin(v as Skin)}
+        >
+          <SegmentedControlIndicator />
+          {SKINS.map((s) => (
+            <SegmentedControlItem key={s.id} value={s.id}>
+              {s.name}
+            </SegmentedControlItem>
+          ))}
+        </SegmentedControl>
+        <Button
+          className="amp-win"
           onClick={() => setMini((m) => !m)}
           aria-label={mini ? "Expand player" : "Minimise player"}
         >
-          {mini ? "▴" : "▾"}
-        </button>
-        <button
+          <span aria-hidden="true">{mini ? "▴" : "▾"}</span>
+        </Button>
+        <Button
+          className="amp-win"
           onClick={() => {
             stop();
             props.onClose();
           }}
           aria-label="Close player"
         >
-          ×
-        </button>
+          <span aria-hidden="true">×</span>
+        </Button>
       </header>
 
-      <div className="amp-lcd">
-        <span className="amp-disc">
-          <Cover
-            album={album}
-            size={96}
-            real={props.real}
-            live={props.liveCover}
-          />
-        </span>
-        <div className="amp-read">
-          <div className="amp-time">
-            {clock(time)}
-            <small>{dur ? ` / ${clock(dur)}` : ""}</small>
-            <b>{label}</b>
-          </div>
-          <div className="amp-marquee">
-            <span>{marquee}</span>
-          </div>
-          <div className="amp-eq" aria-hidden="true">
-            {Array.from({ length: 14 }, (_, i) => (
-              <i key={i} style={{ animationDelay: `${(i * 137) % 900}ms` }} />
-            ))}
-          </div>
-        </div>
-      </div>
+      {skin === "tape" ? (
+        <TapeFace d={deck} album={album} art={art(64)} />
+      ) : (
+        <DesktopFace
+          d={deck}
+          album={album}
+          marquee={marquee}
+          tracks={tracks}
+          list={list}
+          onList={setList}
+        />
+      )}
 
       <div className="amp-body">
         <div
@@ -254,29 +389,32 @@ export function Player(props: {
             (status === "idle" && !yt.current)
           }
         />
-        {(!source || status === "error") &&
-          (status === "error" || !sources.length) && (
-            <form className="amp-note" onSubmit={submit}>
-              <p>
-                {sources.length
+        {askLink && (
+          <form className="amp-note" onSubmit={submit}>
+            <p>
+              {swap
+                ? "Swap the tape: paste any YouTube video or playlist for this album."
+                : sources.length
                   ? "None of the linked videos can play here (removed, or embedding is off)."
                   : "No YouTube track is linked to this album yet."}{" "}
-                Paste a video or playlist link — it’s saved in this browser.
-              </p>
-              <span>
-                <input
-                  value={link}
-                  onChange={(e) => setLink(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=…"
-                  aria-label="YouTube link"
-                />
-                <button disabled={!parseYouTube(link)}>Load</button>
-              </span>
-              <a href={props.searchUrl} target="_blank" rel="noreferrer">
-                Find it on YouTube ↗
-              </a>
-            </form>
-          )}
+              It’s saved in this browser.
+            </p>
+            <Field className="amp-link">
+              <FieldLabel className="sr">YouTube link</FieldLabel>
+              <Input
+                value={link}
+                onValueChange={setLink}
+                placeholder="https://youtube.com/watch?v=…"
+              />
+              <Button type="submit" disabled={!parseYouTube(link)}>
+                Load link
+              </Button>
+            </Field>
+            <a href={props.searchUrl} target="_blank" rel="noreferrer">
+              Find it on YouTube ↗
+            </a>
+          </form>
+        )}
         {status === "blocked" && (
           <p className="amp-note">
             The YouTube player can’t load in this window.{" "}
@@ -293,77 +431,297 @@ export function Player(props: {
             </a>
           </p>
         )}
-        {source && (props.note || pick > 0) && (
+        {source && !swap && (props.note || pick > 0) && (
           <p className="amp-note small">
             {pick > 0
               ? `Link ${pick} wasn’t playable, so this is backup ${pick + 1} of ${sources.length}.`
               : `Linked: ${props.note}.`}
           </p>
         )}
-
-        <input
-          className="amp-seek"
-          type="range"
-          min={0}
-          max={dur || 1}
-          step={1}
-          value={Math.min(time, dur || 1)}
-          disabled={!dur}
-          onChange={(e) => {
-            const t = +e.target.value;
-            setTime(t);
-            yt.current?.seekTo?.(t, true);
-          }}
-          aria-label="Seek"
-        />
-        <div className="amp-ctl">
-          <button onClick={() => props.onStep(-1)} aria-label="Previous album">
-            ⏮
-          </button>
-          <button
-            className="go"
-            onClick={() => void play()}
-            disabled={!source}
-            aria-label="Play"
-          >
-            ▶
-          </button>
-          <button
-            onClick={() => yt.current?.pauseVideo?.()}
-            disabled={status !== "playing"}
-            aria-label="Pause"
-          >
-            ⏸
-          </button>
-          <button onClick={stop} disabled={status === "idle"} aria-label="Stop">
-            ⏹
-          </button>
-          <button onClick={() => props.onStep(1)} aria-label="Next album">
-            ⏭
-          </button>
-          <label>
-            VOL
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={vol}
-              onChange={(e) => {
-                setVol(+e.target.value);
-                yt.current?.setVolume?.(+e.target.value);
-              }}
-              aria-label="Volume"
-            />
-          </label>
-        </div>
-        {tracks && tracks.length > 0 && (
-          <ol className="amp-list" aria-label="Track list">
+        {skin === "tape" && tracks && tracks.length > 0 && (
+          <ol className="jcard" aria-label="Track list">
             {tracks.map((t, i) => (
-              <li key={i}>{t}</li>
+              <li key={`${i}-${t}`}>{t}</li>
             ))}
           </ol>
         )}
       </div>
     </section>
+  );
+}
+
+function Seek({ d, className }: { d: Deck; className?: string }) {
+  const [scrub, setScrub] = useState<number | null>(null);
+  const max = Math.max(1, Math.floor(d.dur));
+  return (
+    <Slider
+      className={className}
+      min={0}
+      max={max}
+      step={1}
+      largeStep={15}
+      value={Math.min(scrub ?? Math.floor(d.time), max)}
+      disabled={!d.dur}
+      format={(v) => clock(v as number)}
+      onValueChange={(v, details) => {
+        const t = v as number;
+        if (details.source === "agent") d.seek(t);
+        else setScrub(t);
+      }}
+      onValueCommit={(v) => {
+        d.seek(v as number);
+        setScrub(null);
+      }}
+    >
+      <SliderControl>
+        <SliderTrack>
+          <SliderIndicator />
+          <SliderThumb aria-label="Seek" />
+        </SliderTrack>
+      </SliderControl>
+    </Slider>
+  );
+}
+
+function Volume({ d, className }: { d: Deck; className?: string }) {
+  return (
+    <Slider
+      className={className}
+      min={0}
+      max={100}
+      value={d.vol}
+      format={(v) => `${v}%`}
+      onValueChange={(v) => d.volume(v as number)}
+    >
+      <SliderControl>
+        <SliderTrack>
+          <SliderIndicator />
+          <SliderThumb aria-label="Volume" />
+        </SliderTrack>
+      </SliderControl>
+    </Slider>
+  );
+}
+
+const Glyph = ({ g }: { g: string }) => <span aria-hidden="true">{g}</span>;
+
+function TapeFace({
+  d,
+  album,
+  art,
+}: {
+  d: Deck;
+  album: Album;
+  art: React.ReactNode;
+}) {
+  const p = d.dur ? Math.min(1, d.time / d.dur) : 0;
+  const count = String(Math.floor(d.time) % 1000).padStart(3, "0");
+  const keys: [string, string, string, () => void, boolean, boolean?][] = [
+    ["◀◀", "REW", "Previous album", () => d.step(-1), false],
+    ["▶", "PLAY", "Play", d.play, !d.source, d.status === "playing"],
+    ["▶▶", "FF", "Next album", () => d.step(1), false],
+    ["■", "STOP", "Stop", d.stop, d.status === "idle"],
+    [
+      "❚❚",
+      "PAUSE",
+      "Pause",
+      d.pause,
+      d.status !== "playing",
+      d.status === "paused",
+    ],
+    ["⏏", "EJECT", "Eject", d.eject, false],
+  ];
+  return (
+    <div
+      className="cdeck"
+      data-wind={d.wind ?? undefined}
+      style={{ "--p": p } as React.CSSProperties}
+    >
+      <div className="tape-top">
+        <span
+          className="tape-led"
+          data-on={d.status === "playing" || undefined}
+        >
+          {d.label}
+        </span>
+        <span
+          className="tape-counter"
+          aria-label={`Counter ${count}`}
+          role="img"
+        >
+          {count.split("").map((c, i) => (
+            <i key={i}>{c}</i>
+          ))}
+        </span>
+      </div>
+
+      <div className="tape-well">
+        <div className="cassette">
+          <div className="cassette-label">
+            <span className="cassette-art">{art}</span>
+            <span className="cassette-text">
+              <b aria-hidden="true">A</b>
+              <strong>{album.title}</strong>
+              <em>
+                {album.artist} · {album.year}
+              </em>
+            </span>
+          </div>
+          <div className="cassette-window" aria-hidden="true">
+            <span className="reel l">
+              <i />
+            </span>
+            <span className="reel r">
+              <i />
+            </span>
+          </div>
+          <span className="cassette-foot" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </div>
+      </div>
+
+      <div className="tape-meters" aria-hidden="true">
+        <span className="vu">
+          <i />
+          <small>L</small>
+        </span>
+        <span className="vu">
+          <i />
+          <small>R</small>
+        </span>
+      </div>
+
+      <div className="tape-keys">
+        {keys.map(([g, cap, name, fn, off, down]) => (
+          <Button
+            key={cap}
+            className="key"
+            aria-label={name}
+            disabled={off}
+            data-down={down || undefined}
+            onClick={fn}
+          >
+            <Glyph g={g} />
+            <small aria-hidden="true">{cap}</small>
+          </Button>
+        ))}
+      </div>
+
+      <div className="tape-row">
+        <span className="tape-cap">
+          {clock(d.time)}
+          {d.dur ? ` / ${clock(d.dur)}` : ""}
+        </span>
+        <Seek d={d} className="tape-seek" />
+        <span className="tape-cap">VOL</span>
+        <Volume d={d} className="tape-vol" />
+      </div>
+    </div>
+  );
+}
+
+function DesktopFace({
+  d,
+  album,
+  marquee,
+  tracks,
+  list,
+  onList,
+}: {
+  d: Deck;
+  album: Album;
+  marquee: string;
+  tracks?: string[];
+  list: boolean;
+  onList: (v: boolean) => void;
+}) {
+  const playing = d.status === "playing";
+  return (
+    <div className="d98">
+      <div className="d98-main">
+        <div className="d98-lcd">
+          <span
+            className="d98-state"
+            data-status={d.status}
+            aria-hidden="true"
+          />
+          <span className="d98-time">{clock(d.time)}</span>
+          <div className="d98-spec" aria-hidden="true">
+            {Array.from({ length: 19 }, (_, i) => (
+              <i key={i} style={{ animationDelay: `${(i * 173) % 1000}ms` }} />
+            ))}
+          </div>
+        </div>
+        <div className="d98-info">
+          <div className="d98-marquee">
+            <span>{marquee}</span>
+          </div>
+          <div className="d98-specs">
+            <span>
+              <b>{playing ? 128 : "--"}</b> kbps
+            </span>
+            <span>
+              <b>{playing ? 44 : "--"}</b> kHz
+            </span>
+            <span data-on={!playing || undefined}>mono</span>
+            <span data-on={playing || undefined}>stereo</span>
+          </div>
+          <Volume d={d} className="d98-vol" />
+        </div>
+      </div>
+      <Seek d={d} className="d98-seek" />
+      <div className="d98-ctl">
+        <Button aria-label="Previous album" onClick={() => d.step(-1)}>
+          <Glyph g="⏮" />
+        </Button>
+        <Button aria-label="Play" disabled={!d.source} onClick={d.play}>
+          <Glyph g="▶" />
+        </Button>
+        <Button aria-label="Pause" disabled={!playing} onClick={d.pause}>
+          <Glyph g="❚❚" />
+        </Button>
+        <Button
+          aria-label="Stop"
+          disabled={d.status === "idle"}
+          onClick={d.stop}
+        >
+          <Glyph g="■" />
+        </Button>
+        <Button aria-label="Next album" onClick={() => d.step(1)}>
+          <Glyph g="⏭" />
+        </Button>
+        <Button aria-label="Eject" onClick={d.eject}>
+          <Glyph g="⏏" />
+        </Button>
+        <span className="d98-led">{d.label}</span>
+        <Toggle
+          className="d98-pl"
+          aria-label="Track list"
+          pressed={list}
+          onPressedChange={onList}
+        >
+          <Glyph g="PL" />
+        </Toggle>
+      </div>
+      {list && (
+        <div className="d98-list">
+          <p>
+            {album.artist} — {album.title}
+          </p>
+          {tracks?.length ? (
+            <ol>
+              {tracks.map((t, i) => (
+                <li key={`${i}-${t}`}>{t}</li>
+              ))}
+            </ol>
+          ) : (
+            <p className="d98-empty">No track list on file for this album.</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

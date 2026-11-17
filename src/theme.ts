@@ -1,4 +1,5 @@
 import type { Album } from "./data/albums";
+import type { Skin } from "./components/Player";
 
 export type ThemeId = "seventies" | "cassette" | "xerox" | "y2k";
 
@@ -55,6 +56,7 @@ export interface Prefs {
   follow: boolean; // switch theme to match the open album
   dense: boolean;
   real: boolean; // show the original cover scans (hotlinked from the source blog)
+  skin: Skin;
 }
 
 const KEY = "bcc:prefs";
@@ -65,6 +67,7 @@ export const defaultPrefs: Prefs = {
   follow: true,
   dense: false,
   real: true,
+  skin: "tape",
   motion:
     typeof matchMedia === "undefined" ||
     !matchMedia("(prefers-reduced-motion: reduce)").matches,
